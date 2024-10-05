@@ -1,0 +1,73 @@
+/* Code.css */
+.code-container {
+    padding: 30px;
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: #f4f4f4;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-size: 28px;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.code-block {
+    margin-bottom: 40px;
+    padding: 20px;
+    background-color: #2c3e50;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    color: white;
+    position: relative;
+}
+
+.code-block h2 {
+    font-size: 22px;
+    margin-bottom: 15px;
+    color: #ecf0f1;
+}
+
+pre {
+    margin: 0;
+    padding: 20px;
+    background-color: #34495e;
+    border-radius: 5px;
+    overflow-x: auto;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+button {
+    margin-top: 15px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 16px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+button:hover {
+    background-color: hsl(6, 68%, 65%);
+}
+
+button:active {
+    background-color: #e74c3c;
+}
+
+.copy-status {
+    font-size: 14px;
+    margin-top: 10px;
+    color: #e74c3c;
+    text-align: right;
+}
