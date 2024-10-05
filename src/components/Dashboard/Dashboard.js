@@ -61,7 +61,7 @@ const Dashboard = () => {
     // If signed in, display the sales and clicks dashboard and user's name
     return (
         <div className="dashboard-container">
-            <h1>Welcome {user.fullName}!</h1>
+            <h1>Welcome to Tracker Booth!</h1>
             <h2>Sales and Clicks Dashboard</h2>
 
             <div className="filter-container">
