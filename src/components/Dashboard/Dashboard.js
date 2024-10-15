@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react'; // Clerk for authentication
 import './Dashboard.css'; // Importing CSS file
+import axios from 'axios';
+
+const SERVER_URL = 'revenue-node-server.vercel.app'
 
 const Dashboard = () => {
     const { isSignedIn, user, isLoaded } = useUser(); // Clerk authentication
@@ -9,14 +12,16 @@ const Dashboard = () => {
     const [filterType, setFilterType] = useState('all');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [videoId, setVideoId] = useState('');  // Video ID state
+    const [videoDetails, setVideoDetails] = useState(null); 
+    const [youtubeName, setYoutubeName] = useState(null); // State for YouTube name
 
-    // State for the username (initially set as 'InternetMadeCoder', but updated to user.id when available)
     const [username, setUsername] = useState('');
 
     // Fetch sales data from the server
     const fetchSalesData = async (username) => {
         try {
-            const response = await fetch(`https://revenue-node-server.vercel.app/api/sales/${username}`);
+            const response = await fetch(`https://${SERVER_URL}/api/sales/${username}`, { withCredentials: true });
             if (!response.ok) {
                 throw new Error('Failed to fetch sales data');
             }
@@ -26,6 +31,51 @@ const Dashboard = () => {
         } catch (error) {
             setError(error.message);
             setLoading(false);
+        }
+    };
+
+    const fetchVideoById = async () => {
+        try {
+            // If you need to add authentication tokens (e.g., JWT) to the headers
+            const config = {
+                headers: {
+                    // Example for including an authentication token in the headers
+                    'Content-Type': 'application/json'
+                },
+                withCredentials: true,  // If cookies are used for session management
+            };
+    
+            // Make the request to the backend
+            const response = await axios.get(`https://${SERVER_URL}/api/youtube-video/${videoId}`, config);
+    
+            console.log('Video Details:', response.data);
+            setVideoDetails(response.data);
+        } catch (error) {
+            if (error.response) {
+                // Server responded with a status code other than 2xx
+                console.error('Error response:', error.response.data);
+                setError(`Error: ${error.response.data.message || 'Fetching video failed'}`);
+            } else if (error.request) {
+                // The request was made, but no response was received
+                console.error('Error request:', error.request);
+                setError('Error: No response from the server');
+            } else {
+                // Something else happened
+                console.error('Error message:', error.message);
+                setError('Error fetching video.');
+            }
+        }
+    };
+
+    // Function to refresh YouTube data
+    const refreshYouTubeData = async () => {
+        try {
+            const response = await axios.post(`https://${SERVER_URL}/api/refresh-yt-data/${username}`);
+            alert(response.data.message);
+            fetchSalesData(username); // Refresh sales data after updating YouTube data
+        } catch (error) {
+            console.error('Error refreshing YouTube data:', error);
+            alert('Error refreshing YouTube data');
         }
     };
 
@@ -41,6 +91,24 @@ const Dashboard = () => {
     useEffect(() => {
         if (username) {
             fetchSalesData(username);
+        }
+    }, [username]);
+
+    // useEffect to check YouTube login status
+    useEffect(() => {
+        const checkYouTubeLogin = async () => {
+            try {
+                const response = await axios.post(`https://${SERVER_URL}/api/check-yt-login`, { userId: username });
+                if (response.data.loggedIn) {
+                    setYoutubeName(response.data.youtubeName);
+                }
+            } catch (error) {
+                console.error('Error checking YouTube login:', error);
+            }
+        };
+
+        if (username) {
+            checkYouTubeLogin();
         }
     }, [username]);
 
@@ -61,8 +129,18 @@ const Dashboard = () => {
     // If signed in, display the sales and clicks dashboard and user's name
     return (
         <div className="dashboard-container">
-            <h1>Welcome to Tracker Booth!</h1>
-            <h2>Sales and Clicks Dashboard</h2>
+            <h1>Welcome to Trackr!</h1>
+            {youtubeName ? (
+                <p>Logged in as: {youtubeName}</p>
+            ) : (
+                <div>
+                    <a href={`https://${SERVER_URL}/api/auth?userId=${user.id}`} target='_blank'>
+                        <button>Login with YouTube</button>
+                    </a>
+                </div>
+            )}
+        
+            <h2>Sales and Clicks Dashboard</h2>{/* Button to refresh YouTube data */}
 
             <div className="filter-container">
                 <label>
@@ -94,6 +172,8 @@ const Dashboard = () => {
                 </label>
             </div>
 
+            <button onClick={refreshYouTubeData}>Refresh YouTube Data</button> 
+
             {loading ? (
                 <p className="loading-message">Loading data...</p>
             ) : error ? (
@@ -104,6 +184,7 @@ const Dashboard = () => {
                         <tr>
                             <th>Category</th>
                             <th>Source</th>
+                            <th>Views</th> 
                             <th>Clicks</th>
                             <th>Sales</th>
                         </tr>
@@ -112,7 +193,8 @@ const Dashboard = () => {
                         {filteredSales.map((sale, index) => (
                             <tr key={index}>
                                 <td>{sale.category}</td>
-                                <td>{sale.name}</td>
+                                <td>{sale.category === 'video' && sale.youtube_title ? sale.youtube_title : sale.name}</td>
+                                <td>{sale.views || 'N/A'}</td> 
                                 <td>{sale.click_count}</td>
                                 <td>{sale.sale_count}</td>
                             </tr>
