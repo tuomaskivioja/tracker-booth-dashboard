@@ -15,8 +15,8 @@ const Dashboard = () => {
     const [videoId, setVideoId] = useState('');  // Video ID state
     const [videoDetails, setVideoDetails] = useState(null); 
     const [youtubeName, setYoutubeName] = useState(null); // State for YouTube name
-
     const [username, setUsername] = useState('');
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
 
     // Fetch sales data from the server
     const fetchSalesData = async (username) => {
@@ -100,6 +100,7 @@ const Dashboard = () => {
             try {
                 const response = await axios.post(`https://${SERVER_URL}/api/check-yt-login`, { userId: username });
                 if (response.data.loggedIn) {
+                    console.log(response.data);
                     setYoutubeName(response.data.youtubeName);
                 }
             } catch (error) {
@@ -112,9 +113,33 @@ const Dashboard = () => {
         }
     }, [username]);
 
-    // Filter sales based on category (all, video, or email)
     const filteredSales =
         filterType === 'all' ? salesData : salesData.filter((sale) => sale.category === filterType);
+
+    const sortedSales = React.useMemo(() => {
+        let sortableSales = [...filteredSales];
+        if (sortConfig.key !== null) {
+            sortableSales.sort((a, b) => {
+                if (a[sortConfig.key] < b[sortConfig.key]) {
+                    return sortConfig.direction === 'ascending' ? -1 : 1;
+                }
+                if (a[sortConfig.key] > b[sortConfig.key]) {
+                    return sortConfig.direction === 'ascending' ? 1 : -1;
+                }
+                return 0;
+            });
+        }
+        return sortableSales;
+    }, [filteredSales, sortConfig]);
+
+
+    const requestSort = (key) => {
+        let direction = 'ascending';
+        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+            direction = 'descending';
+        }
+        setSortConfig({ key, direction });
+    };
 
     // Check if Clerk's user data is loaded
     if (!isLoaded) {
@@ -184,13 +209,28 @@ const Dashboard = () => {
                         <tr>
                             <th>Category</th>
                             <th>Source</th>
-                            <th>Views</th> 
-                            <th>Clicks</th>
-                            <th>Sales</th>
+                            <th
+                                className={`sortable ${sortConfig.key === 'views' ? 'sorted' : ''}`}
+                                onClick={() => requestSort('views')}
+                            >
+                                Views {sortConfig.key === 'views' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                            </th>
+                            <th
+                                className={`sortable ${sortConfig.key === 'click_count' ? 'sorted' : ''}`}
+                                onClick={() => requestSort('click_count')}
+                            >
+                                Clicks {sortConfig.key === 'click_count' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                            </th>
+                            <th
+                                className={`sortable ${sortConfig.key === 'sale_count' ? 'sorted' : ''}`}
+                                onClick={() => requestSort('sale_count')}
+                            >
+                                Sales {sortConfig.key === 'sale_count' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredSales.map((sale, index) => (
+                        {sortedSales.map((sale, index) => (
                             <tr key={index}>
                                 <td>{sale.category}</td>
                                 <td>{sale.category === 'video' && sale.youtube_title ? sale.youtube_title : sale.name}</td>

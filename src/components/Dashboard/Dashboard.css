@@ -61,3 +61,30 @@ table tr:nth-child(even) {
 table tr:hover {
     background-color: #f1f1f1;
 }
+
+.sortable {
+    cursor: pointer;
+    color: #007bff;
+}
+
+.sorted {
+    font-weight: bold;
+}
+
+th {
+    padding: 10px;
+    text-align: left;
+}
+
+th.sorted::after {
+    content: ' ';
+    display: inline-block;
+    margin-left: 5px;
+}
+
+/* Set specific widths for the Views, Clicks, and Sales columns */
+th:nth-child(3), /* Views column */
+th:nth-child(4), /* Clicks column */
+th:nth-child(5)  /* Sales column */ {
+    width: 80px; /* Adjust the width as needed */
+}
