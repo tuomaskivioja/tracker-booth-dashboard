@@ -9,11 +9,11 @@ const Code = () => {
     // Dynamically set the username in the tracker script
     const trackerScript = `
     <meta name="username" content="${user ? user.id : ''}">
-    <script src="https://revenue-node-server.vercel.app/tracker_script.js" defer></script>
+    <script src="https://d15dfsr886zcp9.cloudfront.net/tracker_script.js" defer></script>
 `;
 
     const thankYouScript = `
-    <script src="https://revenue-node-server.vercel.app/thankYou_script.js" defer></script>
+    <script src="https://d15dfsr886zcp9.cloudfront.net/thankYou_script.js" defer></script>
 `;
 
     const copyToClipboard = (code, label) => {
