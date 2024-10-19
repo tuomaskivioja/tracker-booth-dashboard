@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react'; // Clerk for authentication
+import { useUser } from '@clerk/clerk-react'; // Clerk authentication
 import './Dashboard.css'; // Importing CSS file
 import axios from 'axios';
 
@@ -12,11 +12,24 @@ const Dashboard = () => {
     const [filterType, setFilterType] = useState('all');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [videoLink, setVideoLink] = useState('');  // Video link state
     const [videoId, setVideoId] = useState('');  // Video ID state
     const [videoDetails, setVideoDetails] = useState(null); 
     const [youtubeName, setYoutubeName] = useState(null); // State for YouTube name
     const [username, setUsername] = useState('');
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
+    const [landingPage, setLandingPage] = useState(''); // State for landing page input
+    const [cta, setCta] = useState(''); // State for CTA input
+    const [isRefreshing, setIsRefreshing] = useState(false); // State for refresh button
+    const [linkAction, setLinkAction] = useState('new'); // State for link action
+    const [isUpdating, setIsUpdating] = useState(false); // State for update button
+
+    // Function to extract video ID from YouTube URL
+    const extractVideoId = (url) => {
+        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|.+\?v=)?|youtu\.be\/)([^&\n?#]+)/;
+        const match = url.match(regex);
+        return match ? match[1] : null;
+    };
 
     // Fetch sales data from the server
     const fetchSalesData = async (username) => {
@@ -36,31 +49,25 @@ const Dashboard = () => {
 
     const fetchVideoById = async () => {
         try {
-            // If you need to add authentication tokens (e.g., JWT) to the headers
             const config = {
                 headers: {
-                    // Example for including an authentication token in the headers
                     'Content-Type': 'application/json'
                 },
-                withCredentials: true,  // If cookies are used for session management
+                withCredentials: true,
             };
     
-            // Make the request to the backend
             const response = await axios.get(`https://${SERVER_URL}/api/youtube-video/${videoId}`, config);
     
             console.log('Video Details:', response.data);
             setVideoDetails(response.data);
         } catch (error) {
             if (error.response) {
-                // Server responded with a status code other than 2xx
                 console.error('Error response:', error.response.data);
                 setError(`Error: ${error.response.data.message || 'Fetching video failed'}`);
             } else if (error.request) {
-                // The request was made, but no response was received
                 console.error('Error request:', error.request);
                 setError('Error: No response from the server');
             } else {
-                // Something else happened
                 console.error('Error message:', error.message);
                 setError('Error fetching video.');
             }
@@ -69,6 +76,7 @@ const Dashboard = () => {
 
     // Function to refresh YouTube data
     const refreshYouTubeData = async () => {
+        setIsRefreshing(true); // Set refreshing state to true
         try {
             const response = await axios.post(`https://${SERVER_URL}/api/refresh-yt-data/${username}`);
             alert(response.data.message);
@@ -76,13 +84,67 @@ const Dashboard = () => {
         } catch (error) {
             console.error('Error refreshing YouTube data:', error);
             alert('Error refreshing YouTube data');
+        } finally {
+            setIsRefreshing(false); // Reset refreshing state
+        }
+    };
+
+    // Function to update tracking links for all videos
+    const updateTrackingLinksForAllVideos = async () => {
+        setIsUpdating(true); // Set updating state to true
+        try {
+            const response = await axios.put(`https://${SERVER_URL}/api/add-tracking-to-videos`, {
+                userId: username,
+                url: landingPage
+            });
+            alert(response.data.message);
+        } catch (error) {
+            console.error('Error updating tracking links:', error);
+            alert('Error updating tracking links');
+        } finally {
+            setIsUpdating(false); // Reset updating state
+        }
+    };
+
+    // Function to handle link action
+    const handleLinkAction = async () => {
+        console.log(username)
+        const videoId = extractVideoId(videoLink);
+        if (!videoId) {
+            alert('Invalid YouTube video link');
+            return;
+        }
+        setVideoId(videoId); // Set the extracted video ID
+
+        setIsUpdating(true); // Set updating state to true
+        try {
+            if (linkAction === 'new') {
+                // Add new tracking link
+                const response = await axios.put(`https://${SERVER_URL}/api/add-ctalink-to-description/${videoId}`, {
+                    userId: username,
+                    CTA: cta,
+                    url: landingPage
+                });
+                alert(response.data.message);
+            } else {
+                // Update existing link
+                const response = await axios.put(`https://${SERVER_URL}/api/update-video-description/${videoId}`, {
+                    userId: username,
+                    url: landingPage
+                });
+                alert(response.data.message);
+            }
+        } catch (error) {
+            console.error('Error handling link action:', error);
+            alert('Error handling link action');
+        } finally {
+            setIsUpdating(false); // Reset updating state
         }
     };
 
     // useEffect to update the username to user.id once the user is loaded
     useEffect(() => {
         if (isLoaded && isSignedIn) {
-            // Set the username to user.id once loaded
             setUsername(user.id);
         }
     }, [isLoaded, isSignedIn, user]);
@@ -132,7 +194,6 @@ const Dashboard = () => {
         return sortableSales;
     }, [filteredSales, sortConfig]);
 
-
     const requestSort = (key) => {
         let direction = 'ascending';
         if (sortConfig.key === key && sortConfig.direction === 'ascending') {
@@ -154,94 +215,124 @@ const Dashboard = () => {
     // If signed in, display the sales and clicks dashboard and user's name
     return (
         <div className="dashboard-container">
-            <h1>Welcome to Trackr!</h1>
-            {youtubeName ? (
-                <p>Logged in as: {youtubeName}</p>
-            ) : (
-                <div>
-                    <a href={`https://${SERVER_URL}/api/auth?userId=${user.id}`} target='_blank'>
-                        <button>Login with YouTube</button>
-                    </a>
-                </div>
-            )}
-        
-            <h2>Sales and Clicks Dashboard</h2>{/* Button to refresh YouTube data */}
-
-            <div className="filter-container">
-                <label>
-                    <input
-                        type="radio"
-                        value="all"
-                        checked={filterType === 'all'}
-                        onChange={() => setFilterType('all')}
-                    />
-                    All
-                </label>
-                <label>
-                    <input
-                        type="radio"
-                        value="video"
-                        checked={filterType === 'video'}
-                        onChange={() => setFilterType('video')}
-                    />
-                    Video
-                </label>
-                <label>
-                    <input
-                        type="radio"
-                        value="email"
-                        checked={filterType === 'email'}
-                        onChange={() => setFilterType('email')}
-                    />
-                    Email
-                </label>
+            <div className="table-container">
+                <h1>Welcome to Revit!</h1>
+                {youtubeName ? (
+                    <p>Logged in as: {youtubeName}</p>
+                ) : (
+                    <div>
+                        <a href={`https://${SERVER_URL}/api/auth?userId=${user.id}`} target='_blank'>
+                            <button>Login with YouTube</button>
+                        </a>
+                    </div>
+                )}
+            
+                <h2>Sales and Clicks Dashboard</h2>
+                {loading ? (
+                    <p className="loading-message">Loading data...</p>
+                ) : error ? (
+                    <p className="error-message">{error}</p>
+                ) : (
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Source</th>
+                                <th
+                                    className={`sortable ${sortConfig.key === 'views' ? 'sorted' : ''}`}
+                                    onClick={() => requestSort('views')}
+                                >
+                                    Views {sortConfig.key === 'views' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                                </th>
+                                <th
+                                    className={`sortable ${sortConfig.key === 'click_count' ? 'sorted' : ''}`}
+                                    onClick={() => requestSort('click_count')}
+                                >
+                                    Clicks {sortConfig.key === 'click_count' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                                </th>
+                                <th
+                                    className={`sortable ${sortConfig.key === 'sale_count' ? 'sorted' : ''}`}
+                                    onClick={() => requestSort('sale_count')}
+                                >
+                                    Sales {sortConfig.key === 'sale_count' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                                </th>
+                                <th>Click %</th>
+                                <th>Sales % from Clicks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sortedSales.map((sale, index) => {
+                                const clickPercentage = sale.views ? ((sale.click_count / sale.views) * 100).toFixed(2) : 'N/A';
+                                const salesPercentage = sale.click_count ? ((sale.sale_count / sale.click_count) * 100).toFixed(2) : 'N/A';
+                                const formattedViews = sale.views ? new Intl.NumberFormat().format(sale.views) : 'N/A';
+                                return (
+                                    <tr key={index}>
+                                        <td>{sale.category}</td>
+                                        <td>{sale.category === 'video' && sale.youtube_title ? sale.youtube_title : sale.name}</td>
+                                        <td>{formattedViews}</td> 
+                                        <td>{sale.click_count}</td>
+                                        <td>{sale.sale_count}</td>
+                                        <td>{clickPercentage}%</td>
+                                        <td>{salesPercentage}%</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                )}
             </div>
 
-            <button onClick={refreshYouTubeData}>Refresh YouTube Data</button> 
+            <div className="actions-container">
+                {/* Section for updating tracking links for all videos */}
+                <div className="update-tracking-links">
+                    <h3>Update Tracking Links for All Videos</h3>
+                    <input
+                        type="text"
+                        placeholder="Enter landing page URL"
+                        value={landingPage}
+                        onChange={(e) => setLandingPage(e.target.value)}
+                    />
+                    <button onClick={updateTrackingLinksForAllVideos} disabled={isUpdating}>
+                        {isUpdating ? 'Updating...' : 'Update Tracking Links'}
+                    </button>
+                </div>
 
-            {loading ? (
-                <p className="loading-message">Loading data...</p>
-            ) : error ? (
-                <p className="error-message">{error}</p>
-            ) : (
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Category</th>
-                            <th>Source</th>
-                            <th
-                                className={`sortable ${sortConfig.key === 'views' ? 'sorted' : ''}`}
-                                onClick={() => requestSort('views')}
-                            >
-                                Views {sortConfig.key === 'views' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
-                            </th>
-                            <th
-                                className={`sortable ${sortConfig.key === 'click_count' ? 'sorted' : ''}`}
-                                onClick={() => requestSort('click_count')}
-                            >
-                                Clicks {sortConfig.key === 'click_count' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
-                            </th>
-                            <th
-                                className={`sortable ${sortConfig.key === 'sale_count' ? 'sorted' : ''}`}
-                                onClick={() => requestSort('sale_count')}
-                            >
-                                Sales {sortConfig.key === 'sale_count' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {sortedSales.map((sale, index) => (
-                            <tr key={index}>
-                                <td>{sale.category}</td>
-                                <td>{sale.category === 'video' && sale.youtube_title ? sale.youtube_title : sale.name}</td>
-                                <td>{sale.views || 'N/A'}</td> 
-                                <td>{sale.click_count}</td>
-                                <td>{sale.sale_count}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
+                {/* Section for adding or updating tracking link to a specific video */}
+                <div className="add-tracking-link">
+                    <h3>Add or Update Tracking Link to Video</h3>
+                    <select value={linkAction} onChange={(e) => setLinkAction(e.target.value)}>
+                        <option value="new">Add New Link</option>
+                        <option value="update">Update Existing Link</option>
+                    </select>
+                    <input
+                        type="text"
+                        placeholder="Enter YouTube video link"
+                        value={videoLink}
+                        onChange={(e) => setVideoLink(e.target.value)}
+                    />
+                    {linkAction === 'new' && (
+                        <input
+                            type="text"
+                            placeholder="Enter CTA"
+                            value={cta}
+                            onChange={(e) => setCta(e.target.value)}
+                        />
+                    )}
+                    <input
+                        type="text"
+                        placeholder="Enter landing page URL"
+                        value={landingPage}
+                        onChange={(e) => setLandingPage(e.target.value)}
+                    />
+                    <button onClick={handleLinkAction} disabled={isUpdating}>
+                        {isUpdating ? 'Updating...' : (linkAction === 'new' ? 'Add Tracking Link' : 'Update Tracking Link')}
+                    </button>
+                </div>
+
+                <button onClick={refreshYouTubeData} disabled={isRefreshing}>
+                    {isRefreshing ? 'Refreshing...' : 'Refresh YouTube Data'}
+                </button>
+            </div>
         </div>
     );
 };
