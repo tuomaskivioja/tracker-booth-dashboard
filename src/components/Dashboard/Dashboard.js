@@ -3,7 +3,7 @@ import { useUser } from '@clerk/clerk-react'; // Clerk authentication
 import './Dashboard.css'; // Importing CSS file
 import axios from 'axios';
 
-const SERVER_URL = 'revenue-node-server.vercel.app'
+const SERVER_URL = 'revenue-node-server.vercel.app';
 
 const Dashboard = () => {
     const { isSignedIn, user, isLoaded } = useUser(); // Clerk authentication
@@ -23,6 +23,8 @@ const Dashboard = () => {
     const [isRefreshing, setIsRefreshing] = useState(false); // State for refresh button
     const [linkAction, setLinkAction] = useState('new'); // State for link action
     const [isUpdating, setIsUpdating] = useState(false); // State for update button
+    const [offers, setOffers] = useState([]); // State for offers
+    const [selectedOffer, setSelectedOffer] = useState('all'); // State for selected offer
 
     // Function to extract video ID from YouTube URL
     const extractVideoId = (url) => {
@@ -44,6 +46,17 @@ const Dashboard = () => {
         } catch (error) {
             setError(error.message);
             setLoading(false);
+        }
+    };
+
+    // Fetch offers for the user
+    const fetchOffers = async (username) => {
+        try {
+            const response = await axios.get(`https://${SERVER_URL}/api/offers/${username}`);
+            setOffers(response.data);
+        } catch (error) {
+            console.error('Error fetching offers:', error);
+            setError('Error fetching offers');
         }
     };
 
@@ -149,10 +162,11 @@ const Dashboard = () => {
         }
     }, [isLoaded, isSignedIn, user]);
 
-    // useEffect to fetch sales data once the username is set/changed
+    // useEffect to fetch sales data and offers once the username is set/changed
     useEffect(() => {
         if (username) {
             fetchSalesData(username);
+            fetchOffers(username);
         }
     }, [username]);
 
@@ -175,8 +189,10 @@ const Dashboard = () => {
         }
     }, [username]);
 
-    const filteredSales =
-        filterType === 'all' ? salesData : salesData.filter((sale) => sale.category === filterType);
+    const filteredSales = salesData.filter((sale) => {
+        return (filterType === 'all' || sale.category === filterType) &&
+               (selectedOffer === 'all' || sale.offer_name === selectedOffer);
+    });
 
     const sortedSales = React.useMemo(() => {
         let sortableSales = [...filteredSales];
@@ -226,8 +242,44 @@ const Dashboard = () => {
                         </a>
                     </div>
                 )}
-            
+
+                <button onClick={refreshYouTubeData} disabled={isRefreshing}>
+                    {isRefreshing ? 'Refreshing...' : 'Refresh YouTube Data'}
+                </button>
+
                 <h2>Sales and Clicks Dashboard</h2>
+                {/* Category Filter Dropdown */}
+                <div className="filter-container">
+                    <label htmlFor="category-filter">Filter by Category:</label>
+                    <select
+                        id="category-filter"
+                        value={filterType}
+                        onChange={(e) => setFilterType(e.target.value)}
+                    >
+                        <option value="all">All</option>
+                        <option value="video">Video</option>
+                        <option value="email">Email</option>
+                        {/* Add more categories as needed */}
+                    </select>
+                </div>
+
+                {/* Offer Filter Dropdown */}
+                <div className="filter-container">
+                    <label htmlFor="offer-filter">Filter by Offer:</label>
+                    <select
+                        id="offer-filter"
+                        value={selectedOffer}
+                        onChange={(e) => setSelectedOffer(e.target.value)}
+                    >
+                        <option value="all">All Offers</option>
+                        {offers.map((offer) => (
+                            <option key={offer.id} value={offer.name}>
+                                {offer.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
                 {loading ? (
                     <p className="loading-message">Loading data...</p>
                 ) : error ? (
@@ -254,10 +306,10 @@ const Dashboard = () => {
                                     className={`sortable ${sortConfig.key === 'sale_count' ? 'sorted' : ''}`}
                                     onClick={() => requestSort('sale_count')}
                                 >
-                                    Sales {sortConfig.key === 'sale_count' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                                    Conversions {sortConfig.key === 'sale_count' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
                                 </th>
                                 <th>Click %</th>
-                                <th>Sales % from Clicks</th>
+                                <th>Conversions % from Clicks</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -328,10 +380,6 @@ const Dashboard = () => {
                         {isUpdating ? 'Updating...' : (linkAction === 'new' ? 'Add Tracking Link' : 'Update Tracking Link')}
                     </button>
                 </div>
-
-                <button onClick={refreshYouTubeData} disabled={isRefreshing}>
-                    {isRefreshing ? 'Refreshing...' : 'Refresh YouTube Data'}
-                </button>
             </div>
         </div>
     );

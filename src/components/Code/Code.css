@@ -51,7 +51,6 @@ pre {
     cursor: pointer;
     transition: background-color 0.3s;
     font-size: 16px;
-    position: absolute;
     top: 20px;
     right: 20px;
 }
