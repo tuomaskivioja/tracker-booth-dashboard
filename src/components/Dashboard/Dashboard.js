@@ -41,7 +41,19 @@ const Dashboard = () => {
                 throw new Error('Failed to fetch sales data');
             }
             const data = await response.json();
-            setSalesData(data);
+
+            // Convert click_count and sale_count to numbers
+            const formattedData = data.map(resource => ({
+                ...resource,
+                offers: resource.offers.map(offer => ({
+                    ...offer,
+                    click_count: Number(offer.click_count),
+                    sale_count: Number(offer.sale_count)
+                }))
+            }));
+
+            console.log(formattedData);
+            setSalesData(formattedData);
             setLoading(false);
         } catch (error) {
             setError(error.message);
@@ -189,19 +201,40 @@ const Dashboard = () => {
         }
     }, [username]);
 
-    const filteredSales = salesData.filter((sale) => {
-        return (filterType === 'all' || sale.category === filterType) &&
-               (selectedOffer === 'all' || sale.offer_name === selectedOffer);
+    // Filter and aggregate sales data based on selected offer
+    const filteredSales = salesData.map((resource) => {
+        let totalClicks = 0;
+        let totalSales = 0;
+
+        resource.offers.forEach((offer) => {
+            if (selectedOffer === 'all' || offer.offer_name === selectedOffer) {
+                totalClicks += offer.click_count;
+                totalSales += offer.sale_count;
+            }
+        });
+
+        return {
+            ...resource,
+            totalClicks,
+            totalSales,
+        };
+    }).filter((resource) => {
+        // Exclude resources where both clicks and sales are zero
+        return (resource.totalClicks > 0 || resource.totalSales > 0) &&
+               (filterType === 'all' || resource.category === filterType);
     });
 
     const sortedSales = React.useMemo(() => {
         let sortableSales = [...filteredSales];
         if (sortConfig.key !== null) {
             sortableSales.sort((a, b) => {
-                if (a[sortConfig.key] < b[sortConfig.key]) {
+                const aValue = Number(a[sortConfig.key]) || 0; // Convert to number, default to 0 if NaN
+                const bValue = Number(b[sortConfig.key]) || 0; // Convert to number, default to 0 if NaN
+
+                if (aValue < bValue) {
                     return sortConfig.direction === 'ascending' ? -1 : 1;
                 }
-                if (a[sortConfig.key] > b[sortConfig.key]) {
+                if (aValue > bValue) {
                     return sortConfig.direction === 'ascending' ? 1 : -1;
                 }
                 return 0;
@@ -297,16 +330,16 @@ const Dashboard = () => {
                                     Views {sortConfig.key === 'views' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
                                 </th>
                                 <th
-                                    className={`sortable ${sortConfig.key === 'click_count' ? 'sorted' : ''}`}
-                                    onClick={() => requestSort('click_count')}
+                                    className={`sortable ${sortConfig.key === 'totalClicks' ? 'sorted' : ''}`}
+                                    onClick={() => requestSort('totalClicks')}
                                 >
-                                    Clicks {sortConfig.key === 'click_count' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                                    Clicks {sortConfig.key === 'totalClicks' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
                                 </th>
                                 <th
-                                    className={`sortable ${sortConfig.key === 'sale_count' ? 'sorted' : ''}`}
-                                    onClick={() => requestSort('sale_count')}
+                                    className={`sortable ${sortConfig.key === 'totalSales' ? 'sorted' : ''}`}
+                                    onClick={() => requestSort('totalSales')}
                                 >
-                                    Conversions {sortConfig.key === 'sale_count' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                                    Conversions {sortConfig.key === 'totalSales' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
                                 </th>
                                 <th>Click %</th>
                                 <th>Conversions % from Clicks</th>
@@ -314,16 +347,16 @@ const Dashboard = () => {
                         </thead>
                         <tbody>
                             {sortedSales.map((sale, index) => {
-                                const clickPercentage = sale.views ? ((sale.click_count / sale.views) * 100).toFixed(2) : 'N/A';
-                                const salesPercentage = sale.click_count ? ((sale.sale_count / sale.click_count) * 100).toFixed(2) : 'N/A';
+                                const clickPercentage = sale.views ? ((sale.totalClicks / sale.views) * 100).toFixed(2) : 'N/A';
+                                const salesPercentage = sale.totalClicks ? ((sale.totalSales / sale.totalClicks) * 100).toFixed(2) : 'N/A';
                                 const formattedViews = sale.views ? new Intl.NumberFormat().format(sale.views) : 'N/A';
                                 return (
                                     <tr key={index}>
                                         <td>{sale.category}</td>
                                         <td>{sale.category === 'video' && sale.youtube_title ? sale.youtube_title : sale.name}</td>
                                         <td>{formattedViews}</td> 
-                                        <td>{sale.click_count}</td>
-                                        <td>{sale.sale_count}</td>
+                                        <td>{Number(sale.totalClicks)}</td>
+                                        <td>{Number(sale.totalSales)}</td>
                                         <td>{clickPercentage}%</td>
                                         <td>{salesPercentage}%</td>
                                     </tr>
@@ -350,34 +383,22 @@ const Dashboard = () => {
                 </div>
 
                 {/* Section for adding or updating tracking link to a specific video */}
-                <div className="add-tracking-link">
-                    <h3>Add or Update Tracking Link to Video</h3>
-                    <select value={linkAction} onChange={(e) => setLinkAction(e.target.value)}>
-                        <option value="new">Add New Link</option>
-                        <option value="update">Update Existing Link</option>
-                    </select>
+                <div className="add-update-link">
+                    <h3>Add/Update Tracking Link to Video</h3>
                     <input
                         type="text"
                         placeholder="Enter YouTube video link"
                         value={videoLink}
                         onChange={(e) => setVideoLink(e.target.value)}
                     />
-                    {linkAction === 'new' && (
-                        <input
-                            type="text"
-                            placeholder="Enter CTA"
-                            value={cta}
-                            onChange={(e) => setCta(e.target.value)}
-                        />
-                    )}
                     <input
                         type="text"
-                        placeholder="Enter landing page URL"
-                        value={landingPage}
-                        onChange={(e) => setLandingPage(e.target.value)}
+                        placeholder="Enter CTA"
+                        value={cta}
+                        onChange={(e) => setCta(e.target.value)}
                     />
                     <button onClick={handleLinkAction} disabled={isUpdating}>
-                        {isUpdating ? 'Updating...' : (linkAction === 'new' ? 'Add Tracking Link' : 'Update Tracking Link')}
+                        {isUpdating ? 'Processing...' : 'Add/Update Link'}
                     </button>
                 </div>
             </div>
