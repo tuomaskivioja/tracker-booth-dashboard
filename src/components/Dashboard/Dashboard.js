@@ -33,6 +33,18 @@ const Dashboard = () => {
         return match ? match[1] : null;
     };
 
+    const handleLogout = async () => {
+        try {
+            const response = await axios.post(`https://${SERVER_URL}/api/logout-youtube`, { userId: username });
+            if (response.data.success) {
+                console.log('Logged out successfully');
+                // Optionally, redirect the user or update the UI
+            }
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
+    };
+
     // Fetch sales data from the server
     const fetchSalesData = async (username) => {
         try {
@@ -143,22 +155,12 @@ const Dashboard = () => {
 
         setIsUpdating(true); // Set updating state to true
         try {
-            if (linkAction === 'new') {
-                // Add new tracking link
-                const response = await axios.put(`https://${SERVER_URL}/api/add-ctalink-to-description/${videoId}`, {
-                    userId: username,
-                    CTA: cta,
-                    url: landingPage
-                });
-                alert(response.data.message);
-            } else {
-                // Update existing link
-                const response = await axios.put(`https://${SERVER_URL}/api/update-video-description/${videoId}`, {
-                    userId: username,
-                    url: landingPage
-                });
-                alert(response.data.message);
-            }
+            // Update existing link
+            const response = await axios.put(`https://${SERVER_URL}/api/update-video-description/${videoId}`, {
+                userId: username,
+                url: landingPage
+            });
+            alert(response.data.message);
         } catch (error) {
             console.error('Error handling link action:', error);
             alert('Error handling link action');
@@ -267,7 +269,10 @@ const Dashboard = () => {
             <div className="table-container">
                 <h1>Welcome to Revit!</h1>
                 {youtubeName ? (
+                    <div>
                     <p>Logged in as: {youtubeName}</p>
+                        <button onClick={handleLogout}>Logout from YouTube</button>
+                    </div>
                 ) : (
                     <div>
                         <a href={`https://${SERVER_URL}/api/auth?userId=${user.id}`} target='_blank'>
@@ -384,7 +389,7 @@ const Dashboard = () => {
 
                 {/* Section for adding or updating tracking link to a specific video */}
                 <div className="add-update-link">
-                    <h3>Add/Update Tracking Link to Video</h3>
+                    <h3>Update Tracking Link for a Specific Video</h3>
                     <input
                         type="text"
                         placeholder="Enter YouTube video link"
@@ -393,12 +398,18 @@ const Dashboard = () => {
                     />
                     <input
                         type="text"
+                        placeholder="Enter landing page URL" // Updated placeholder
+                        value={landingPage} // Use landingPage state
+                        onChange={(e) => setLandingPage(e.target.value)} // Update landingPage state
+                    />
+                    {/* <input
+                        type="text"
                         placeholder="Enter CTA"
                         value={cta}
                         onChange={(e) => setCta(e.target.value)}
-                    />
+                    /> */}
                     <button onClick={handleLinkAction} disabled={isUpdating}>
-                        {isUpdating ? 'Processing...' : 'Add/Update Link'}
+                        {isUpdating ? 'Processing...' : 'Update Link'}
                     </button>
                 </div>
             </div>
