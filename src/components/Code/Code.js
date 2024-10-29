@@ -43,7 +43,7 @@ const Code = () => {
         <div className="code-container">
             <h1>Code Blocks</h1>
 
-            <p>In order for Tracker Booth to work, all you need to do is insert two code blocks into your website. Please follow the instructions below carefully.</p>
+            <p>In order for Revit to work, all you need to do is insert two code blocks into your website. Please follow the instructions below carefully.</p>
 
             <div className="offer-input">
                 <label htmlFor="offer-name">Enter Offer Name:</label>
