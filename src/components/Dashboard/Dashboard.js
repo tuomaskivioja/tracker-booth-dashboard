@@ -25,6 +25,9 @@ const Dashboard = () => {
     const [isUpdating, setIsUpdating] = useState(false); // State for update button
     const [offers, setOffers] = useState([]); // State for offers
     const [selectedOffer, setSelectedOffer] = useState('all'); // State for selected offer
+    const [oldLink, setOldLink] = useState('');
+    const [newLink, setNewLink] = useState('');
+    const [isReplacing, setIsReplacing] = useState(false);
 
     // Function to extract video ID from YouTube URL
     const extractVideoId = (url) => {
@@ -253,6 +256,23 @@ const Dashboard = () => {
         setSortConfig({ key, direction });
     };
 
+    const replaceLinksInVideos = async () => {
+        setIsReplacing(true); // Set replacing state to true
+        try {
+            const response = await axios.put(`https://${SERVER_URL}/api/replace-link-in-videos`, {
+                userId: username,
+                oldLink,
+                newLink
+            });
+            alert(response.data.message);
+        } catch (error) {
+            console.error('Error replacing links:', error);
+            alert('Error replacing links');
+        } finally {
+            setIsReplacing(false); // Reset replacing state
+        }
+    };
+
     // Check if Clerk's user data is loaded
     if (!isLoaded) {
         return <p>Loading user info...</p>;
@@ -398,18 +418,32 @@ const Dashboard = () => {
                     />
                     <input
                         type="text"
-                        placeholder="Enter landing page URL" // Updated placeholder
-                        value={landingPage} // Use landingPage state
-                        onChange={(e) => setLandingPage(e.target.value)} // Update landingPage state
+                        placeholder="Enter landing page URL"
+                        value={landingPage}
+                        onChange={(e) => setLandingPage(e.target.value)}
                     />
-                    {/* <input
-                        type="text"
-                        placeholder="Enter CTA"
-                        value={cta}
-                        onChange={(e) => setCta(e.target.value)}
-                    /> */}
                     <button onClick={handleLinkAction} disabled={isUpdating}>
                         {isUpdating ? 'Processing...' : 'Update Link'}
+                    </button>
+                </div>
+
+                {/* New Section for Replacing Links in Video Descriptions */}
+                <div className="replace-link-in-videos">
+                    <h3>Replace Links in Video Descriptions</h3>
+                    <input
+                        type="text"
+                        placeholder="Enter old link"
+                        value={oldLink}
+                        onChange={(e) => setOldLink(e.target.value)}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Enter new link"
+                        value={newLink}
+                        onChange={(e) => setNewLink(e.target.value)}
+                    />
+                    <button onClick={replaceLinksInVideos} disabled={isReplacing}>
+                        {isReplacing ? 'Replacing...' : 'Replace Links'}
                     </button>
                 </div>
             </div>
