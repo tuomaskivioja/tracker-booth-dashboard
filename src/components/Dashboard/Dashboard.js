@@ -28,6 +28,7 @@ const Dashboard = () => {
     const [oldLink, setOldLink] = useState('');
     const [newLink, setNewLink] = useState('');
     const [isReplacing, setIsReplacing] = useState(false);
+    const [targetUrl, setTargetUrl] = useState(''); // State for target URL input
 
     // Function to extract video ID from YouTube URL
     const extractVideoId = (url) => {
@@ -273,6 +274,27 @@ const Dashboard = () => {
         }
     };
 
+    // Function to clean link in video description
+    const cleanLinkInVideo = async () => {
+        const videoId = extractVideoId(videoLink);
+        if (!videoId) {
+            alert('Invalid YouTube video link');
+            return;
+        }
+
+        try {
+            const response = await axios.put(`https://${SERVER_URL}/api/clean-link-in-video/${videoId}`, {
+                userId: username,
+                targetUrl
+            });
+
+            alert(response.data.message);
+        } catch (error) {
+            console.error('Error cleaning link in video:', error);
+            alert('Error cleaning link in video');
+        }
+    };
+
     // Check if Clerk's user data is loaded
     if (!isLoaded) {
         return <p>Loading user info...</p>;
@@ -444,6 +466,26 @@ const Dashboard = () => {
                     />
                     <button onClick={replaceLinksInVideos} disabled={isReplacing}>
                         {isReplacing ? 'Replacing...' : 'Replace Links'}
+                    </button>
+                </div>
+
+                {/* Section for cleaning link in a specific video */}
+                <div className="clean-link-in-video">
+                    <h3>Clean Link in Video Description</h3>
+                    <input
+                        type="text"
+                        placeholder="Enter YouTube video link"
+                        value={videoLink}
+                        onChange={(e) => setVideoLink(e.target.value)}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Enter target URL"
+                        value={targetUrl}
+                        onChange={(e) => setTargetUrl(e.target.value)}
+                    />
+                    <button onClick={cleanLinkInVideo}>
+                        Clean Link
                     </button>
                 </div>
             </div>
