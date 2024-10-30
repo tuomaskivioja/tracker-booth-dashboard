@@ -29,6 +29,7 @@ const Dashboard = () => {
     const [newLink, setNewLink] = useState('');
     const [isReplacing, setIsReplacing] = useState(false);
     const [targetUrl, setTargetUrl] = useState(''); // State for target URL input
+    const [targetUrlForAll, setTargetUrlForAll] = useState(''); // State for target URL input for all videos
 
     // Function to extract video ID from YouTube URL
     const extractVideoId = (url) => {
@@ -295,6 +296,24 @@ const Dashboard = () => {
         }
     };
 
+    // Function to clean link in all video descriptions
+    const cleanLinkInAllVideos = async () => {
+        setIsReplacing(true); // Set replacing state to true
+        try {
+            const response = await axios.put(`https://${SERVER_URL}/api/clean-link-in-all-videos`, {
+                userId: username,
+                targetUrl: targetUrlForAll
+            });
+
+            alert(response.data.message);
+        } catch (error) {
+            console.error('Error cleaning links in all videos:', error);
+            alert('Error cleaning links in all videos');
+        } finally {
+            setIsReplacing(false); // Reset replacing state
+        }
+    };
+
     // Check if Clerk's user data is loaded
     if (!isLoaded) {
         return <p>Loading user info...</p>;
@@ -486,6 +505,20 @@ const Dashboard = () => {
                     />
                     <button onClick={cleanLinkInVideo}>
                         Clean Link
+                    </button>
+                </div>
+
+                {/* New Section for cleaning link in all video descriptions */}
+                <div className="clean-link-in-all-videos">
+                    <h3>Clean Link in All Video Descriptions</h3>
+                    <input
+                        type="text"
+                        placeholder="Enter target URL"
+                        value={targetUrlForAll}
+                        onChange={(e) => setTargetUrlForAll(e.target.value)}
+                    />
+                    <button onClick={cleanLinkInAllVideos} disabled={isReplacing}>
+                        {isReplacing ? 'Cleaning...' : 'Clean Links'}
                     </button>
                 </div>
             </div>
