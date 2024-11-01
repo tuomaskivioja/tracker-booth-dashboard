@@ -3,7 +3,7 @@ import { useUser } from '@clerk/clerk-react'; // Clerk authentication
 import './Dashboard.css'; // Importing CSS file
 import axios from 'axios';
 
-const SERVER_URL = 'revenue-node-server.vercel.app';
+const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
 const Dashboard = () => {
     const { isSignedIn, user, isLoaded } = useUser(); // Clerk authentication
