@@ -493,7 +493,7 @@ const Dashboard = () => {
                     </button>
                 </div>
 
-                {/* Section for cleaning link in a specific video
+                
                 <div className="clean-link-in-video">
                     <h3>Clean Link in Video Description</h3>
                     <input
@@ -514,7 +514,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* New Section for cleaning link in all video descriptions */}
-                {/* <div className="clean-link-in-all-videos">
+                <div className="clean-link-in-all-videos">
                     <h3>Clean Link in All Video Descriptions</h3>
                     <input
                         type="text"
@@ -525,7 +525,7 @@ const Dashboard = () => {
                     <button onClick={cleanLinkInAllVideos} disabled={isReplacing}>
                         {isReplacing ? 'Cleaning...' : 'Clean Links'}
                     </button>
-                </div>  */}
+                </div> 
             </div>
         </div>
     );
