@@ -178,6 +178,21 @@ const Dashboard = () => {
         }
     }, [username]);
 
+    useEffect(() => {
+        const loadOffers = async () => {
+            if (username) {
+                try {
+                    const userOffers = await fetchOffers(username);
+                    setOffers(userOffers);
+                } catch (error) {
+                    console.error('Error loading offers:', error);
+                }
+            }
+        };
+ 
+        loadOffers();
+    }, [username]);
+
     // useEffect to check YouTube login status
     useEffect(() => {
         const checkYouTubeLogin = async () => {
