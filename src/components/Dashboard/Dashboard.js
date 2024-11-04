@@ -314,6 +314,12 @@ const Dashboard = () => {
         }
     };
 
+    // Define the function before using it
+    const handleLoginWithYouTube = () => {
+        const url = `https://${SERVER_URL}/api/auth?userId=${user.id}`;
+        window.open(url, '_blank');
+    };
+
     // Check if Clerk's user data is loaded
     if (!isLoaded) {
         return <p>Loading user info...</p>;
@@ -336,9 +342,7 @@ const Dashboard = () => {
                     </div>
                 ) : (
                     <div>
-                        <a href={`https://${SERVER_URL}/api/auth?userId=${user.id}`} target='_blank'>
-                            <button>Login with YouTube</button>
-                        </a>
+                        <button onClick={handleLoginWithYouTube}>Login with YouTube</button>
                     </div>
                 )}
 
