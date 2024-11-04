@@ -30,7 +30,7 @@ const Code = () => {
         if (offerName.trim()) {
             setOffers([...offers, offerName]);
             setGenerated(true);
-            setOfferName('');
+            setOfferName(offerName);
         } else {
             alert('Please enter an offer name.');
         }
