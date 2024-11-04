@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react'; // Clerk authentication
 import './Dashboard.css'; // Importing CSS file
 import axios from 'axios';
+import { fetchOffers } from '../../utils/apiCalls';
 
 const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
@@ -75,17 +76,6 @@ const Dashboard = () => {
         } catch (error) {
             setError(error.message);
             setLoading(false);
-        }
-    };
-
-    // Fetch offers for the user
-    const fetchOffers = async (username) => {
-        try {
-            const response = await axios.get(`https://${SERVER_URL}/api/offers/${username}`);
-            setOffers(response.data);
-        } catch (error) {
-            console.error('Error fetching offers:', error);
-            setError('Error fetching offers');
         }
     };
 
@@ -185,7 +175,6 @@ const Dashboard = () => {
     useEffect(() => {
         if (username) {
             fetchSalesData(username);
-            fetchOffers(username);
         }
     }, [username]);
 
