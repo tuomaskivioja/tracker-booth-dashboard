@@ -15,7 +15,7 @@ function App() {
       <Router>
         <header>
           <SignedOut>
-            {location.pathname !== '/privacy-policy' && <SignInPage />}
+            <SignInPage />
           </SignedOut>
           <SignedIn>
             <Sidebar />
