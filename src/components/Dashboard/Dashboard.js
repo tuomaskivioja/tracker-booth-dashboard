@@ -438,20 +438,6 @@ const Dashboard = () => {
             </div>
 
             <div className="actions-container">
-                {/* Section for updating tracking links for all videos */}
-                <div className="update-tracking-links">
-                    <h3>Update Tracking Links for All Videos</h3>
-                    <input
-                        type="text"
-                        placeholder="Enter landing page URL"
-                        value={landingPage}
-                        onChange={(e) => setLandingPage(e.target.value)}
-                    />
-                    <button onClick={updateTrackingLinksForAllVideos} disabled={isUpdating}>
-                        {isUpdating ? 'Updating...' : 'Update Tracking Links'}
-                    </button>
-                </div>
-
                 {/* Section for adding or updating tracking link to a specific video */}
                 <div className="add-update-link">
                     <h3>Update Tracking Link for a Specific Video</h3>
@@ -463,12 +449,27 @@ const Dashboard = () => {
                     />
                     <input
                         type="text"
-                        placeholder="Enter landing page URL"
+                        placeholder="Enter landing page URL (without any utm parameters)"
                         value={landingPage}
                         onChange={(e) => setLandingPage(e.target.value)}
                     />
                     <button onClick={handleLinkAction} disabled={isUpdating}>
                         {isUpdating ? 'Processing...' : 'Update Link'}
+                    </button>
+                </div>
+                {/* Section for updating tracking links for all videos */}
+
+                <div className="update-tracking-links">
+                    <h3>Update Tracking Links for All Videos</h3>
+                    <p> Warning: Only use this after you have tested the link in a specific video using the form above</p>
+                    <input
+                        type="text"
+                        placeholder="Enter landing page URL"
+                        value={landingPage}
+                        onChange={(e) => setLandingPage(e.target.value)}
+                    />
+                    <button onClick={updateTrackingLinksForAllVideos} disabled={isUpdating}>
+                        {isUpdating ? 'Updating...' : 'Update Tracking Links'}
                     </button>
                 </div>
 
@@ -492,7 +493,7 @@ const Dashboard = () => {
                     </button>
                 </div>
 
-                {/* Section for cleaning link in a specific video */}
+                {/* Section for cleaning link in a specific video
                 <div className="clean-link-in-video">
                     <h3>Clean Link in Video Description</h3>
                     <input
@@ -513,7 +514,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* New Section for cleaning link in all video descriptions */}
-                <div className="clean-link-in-all-videos">
+                {/* <div className="clean-link-in-all-videos">
                     <h3>Clean Link in All Video Descriptions</h3>
                     <input
                         type="text"
@@ -524,7 +525,7 @@ const Dashboard = () => {
                     <button onClick={cleanLinkInAllVideos} disabled={isReplacing}>
                         {isReplacing ? 'Cleaning...' : 'Clean Links'}
                     </button>
-                </div>
+                </div>  */}
             </div>
         </div>
     );
