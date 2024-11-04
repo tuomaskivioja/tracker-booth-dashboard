@@ -14,22 +14,23 @@ function App() {
       <Router>
         <header>
           <SignedOut>
-            <SignInPage />
+            <Routes>
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/" element={<SignInPage />} />
+            </Routes>
           </SignedOut>
           <SignedIn>
             <Sidebar />
             <SignOutButton style={{ backgroundColor: '#e74c3c' }} />
             <div className="content">
               <Routes>
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/" element={<Navigate to="/dashboard" />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/code" element={<Code />} />
               </Routes>
             </div>
           </SignedIn>
-          <Routes>
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          </Routes>
         </header>
       </Router>
     );
