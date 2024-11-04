@@ -9,7 +9,6 @@ import SignInPage from './components/SignIn/SignIn';
 
 function App() {
     const { isSignedIn, user, isLoaded } = useUser();
-    const location = useLocation();
 
     return (
       <Router>
