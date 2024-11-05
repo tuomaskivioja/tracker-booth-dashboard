@@ -407,64 +407,45 @@ const Dashboard = () => {
                     <table>
                         <thead>
                             <tr>
-                                {/* {selectedOffer === 'all' && <th></th>} For toggle button */}
                                 <th>Category</th>
                                 <th>Source</th>
-                                {/* <th>Views</th> */}
-                                <th>Clicks</th>
-                                <th>Conversions</th>
+                                {/* <th
+                                    className={`sortable ${sortConfig.key === 'views' ? 'sorted' : ''}`}
+                                    onClick={() => requestSort('views')}
+                                >
+                                    Views {sortConfig.key === 'views' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                                </th> */}
+                                <th
+                                    className={`sortable ${sortConfig.key === 'totalClicks' ? 'sorted' : ''}`}
+                                    onClick={() => requestSort('totalClicks')}
+                                >
+                                    Clicks {sortConfig.key === 'totalClicks' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                                </th>
+                                <th
+                                    className={`sortable ${sortConfig.key === 'totalSales' ? 'sorted' : ''}`}
+                                    onClick={() => requestSort('totalSales')}
+                                >
+                                    Conversions {sortConfig.key === 'totalSales' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                                </th>
                                 {/* <th>Click %</th> */}
                                 <th>Conversions % from Clicks</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredSales.map((sale, index) => {
+                            {sortedSales.map((sale, index) => {
                                 const clickPercentage = sale.views ? ((sale.totalClicks / sale.views) * 100).toFixed(2) : 'N/A';
                                 const salesPercentage = sale.totalClicks ? ((sale.totalSales / sale.totalClicks) * 100).toFixed(2) : 'N/A';
                                 const formattedViews = sale.views ? new Intl.NumberFormat().format(sale.views) : 'N/A';
                                 return (
-                                    <React.Fragment key={index}>
-                                        <tr>
-                                        {/* {selectedOffer === 'all' && (
-                                            <td>
-                                                <button onClick={() => toggleRow(index)}>
-                                                    {toggledRows[index] ? '-' : '+'}
-                                                </button>
-                                            </td>
-                                        )} */}
-                                            <td>{sale.category}</td>
-                                            <td>{sale.category === 'video' && sale.youtube_title ? sale.youtube_title : sale.name}</td>
-                                            {/* <td>{formattedViews}</td> */}
-                                            <td>{Number(sale.totalClicks)}</td>
-                                            <td>{Number(sale.totalSales)}</td>
-                                            {/* <td>{clickPercentage}%</td> */}
-                                            <td>{salesPercentage}%</td>
-                                        </tr>
-                                        {toggledRows[index] && (
-                                            <tr>
-                                                <td colSpan="8">
-                                                    <table className="inner-table">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Offer Name</th>
-                                                                <th>Clicks</th>
-                                                                <th>Conversions</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {sale.offers.map((offer, offerIndex) => (
-                                                                <tr key={offerIndex}>
-                                                                    <td>{offer.offer_name}</td>
-                                                                    <td>{offer.click_count}</td>
-                                                                    <td>{offer.sale_count}</td>
-                                                                </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </React.Fragment>
+                                    <tr key={index}>
+                                        <td>{sale.category}</td>
+                                        <td>{sale.category === 'video' && sale.youtube_title ? sale.youtube_title : sale.name}</td>
+                                        {/* <td>{formattedViews}</td> */}
+                                        <td>{Number(sale.totalClicks)}</td>
+                                        <td>{Number(sale.totalSales)}</td>
+                                        {/* <td>{clickPercentage}%</td> */}
+                                        <td>{salesPercentage}%</td>
+                                    </tr>
                                 );
                             })}
                         </tbody>
