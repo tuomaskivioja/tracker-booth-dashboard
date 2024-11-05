@@ -378,6 +378,10 @@ const Dashboard = () => {
                         <option value="all">All</option>
                         <option value="video">Video</option>
                         <option value="email">Email</option>
+                        <option value="community">Community</option>
+                        <option value="channel">Channel</option>
+                        <option value="twitter">Twitter</option>
+                        <option value="instagram">Instagram</option>
                         {/* Add more categories as needed */}
                     </select>
                 </div>
