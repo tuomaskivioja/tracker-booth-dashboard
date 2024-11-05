@@ -31,6 +31,7 @@ const Dashboard = () => {
     const [isReplacing, setIsReplacing] = useState(false);
     const [targetUrl, setTargetUrl] = useState(''); // State for target URL input
     const [targetUrlForAll, setTargetUrlForAll] = useState(''); // State for target URL input for all videos
+    const [toggledRows, setToggledRows] = useState({}); // State to track toggled rows
 
     // Function to extract video ID from YouTube URL
     const extractVideoId = (url) => {
@@ -324,6 +325,13 @@ const Dashboard = () => {
         window.open(url, '_blank');
     };
 
+    const toggleRow = (index) => {
+        setToggledRows(prevState => ({
+            ...prevState,
+            [index]: !prevState[index]
+        }));
+    };
+
     // Check if Clerk's user data is loaded
     if (!isLoaded) {
         return <p>Loading user info...</p>;
@@ -395,45 +403,64 @@ const Dashboard = () => {
                     <table>
                         <thead>
                             <tr>
+                                {/* {selectedOffer === 'all' && <th></th>} For toggle button */}
                                 <th>Category</th>
                                 <th>Source</th>
-                                <th
-                                    className={`sortable ${sortConfig.key === 'views' ? 'sorted' : ''}`}
-                                    onClick={() => requestSort('views')}
-                                >
-                                    Views {sortConfig.key === 'views' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
-                                </th>
-                                <th
-                                    className={`sortable ${sortConfig.key === 'totalClicks' ? 'sorted' : ''}`}
-                                    onClick={() => requestSort('totalClicks')}
-                                >
-                                    Clicks {sortConfig.key === 'totalClicks' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
-                                </th>
-                                <th
-                                    className={`sortable ${sortConfig.key === 'totalSales' ? 'sorted' : ''}`}
-                                    onClick={() => requestSort('totalSales')}
-                                >
-                                    Conversions {sortConfig.key === 'totalSales' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
-                                </th>
-                                <th>Click %</th>
+                                {/* <th>Views</th> */}
+                                <th>Clicks</th>
+                                <th>Conversions</th>
+                                {/* <th>Click %</th> */}
                                 <th>Conversions % from Clicks</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {sortedSales.map((sale, index) => {
+                            {filteredSales.map((sale, index) => {
                                 const clickPercentage = sale.views ? ((sale.totalClicks / sale.views) * 100).toFixed(2) : 'N/A';
                                 const salesPercentage = sale.totalClicks ? ((sale.totalSales / sale.totalClicks) * 100).toFixed(2) : 'N/A';
                                 const formattedViews = sale.views ? new Intl.NumberFormat().format(sale.views) : 'N/A';
                                 return (
-                                    <tr key={index}>
-                                        <td>{sale.category}</td>
-                                        <td>{sale.category === 'video' && sale.youtube_title ? sale.youtube_title : sale.name}</td>
-                                        <td>{formattedViews}</td> 
-                                        <td>{Number(sale.totalClicks)}</td>
-                                        <td>{Number(sale.totalSales)}</td>
-                                        <td>{clickPercentage}%</td>
-                                        <td>{salesPercentage}%</td>
-                                    </tr>
+                                    <React.Fragment key={index}>
+                                        <tr>
+                                        {/* {selectedOffer === 'all' && (
+                                            <td>
+                                                <button onClick={() => toggleRow(index)}>
+                                                    {toggledRows[index] ? '-' : '+'}
+                                                </button>
+                                            </td>
+                                        )} */}
+                                            <td>{sale.category}</td>
+                                            <td>{sale.category === 'video' && sale.youtube_title ? sale.youtube_title : sale.name}</td>
+                                            {/* <td>{formattedViews}</td> */}
+                                            <td>{Number(sale.totalClicks)}</td>
+                                            <td>{Number(sale.totalSales)}</td>
+                                            {/* <td>{clickPercentage}%</td> */}
+                                            <td>{salesPercentage}%</td>
+                                        </tr>
+                                        {toggledRows[index] && (
+                                            <tr>
+                                                <td colSpan="8">
+                                                    <table className="inner-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Offer Name</th>
+                                                                <th>Clicks</th>
+                                                                <th>Conversions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {sale.offers.map((offer, offerIndex) => (
+                                                                <tr key={offerIndex}>
+                                                                    <td>{offer.offer_name}</td>
+                                                                    <td>{offer.click_count}</td>
+                                                                    <td>{offer.sale_count}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </React.Fragment>
                                 );
                             })}
                         </tbody>
@@ -445,6 +472,7 @@ const Dashboard = () => {
                 {/* Section for adding or updating tracking link to a specific video */}
                 <div className="add-update-link">
                     <h3>Update Tracking Link for a Specific Video</h3>
+                    <p> This will add the Revit tracking parameter to the link in the video description</p>
                     <input
                         type="text"
                         placeholder="Enter YouTube video link"
@@ -498,8 +526,10 @@ const Dashboard = () => {
                 </div>
 
                 
-                {/* <div className="clean-link-in-video">
-                    <h3>Clean Link in Video Description</h3>
+                <div className="clean-link-in-video">
+                    <h3>Reset Link in Video Description</h3>
+                    <p> This will remove any utm parameters from the link in the video description</p>
+
                     <input
                         type="text"
                         placeholder="Enter YouTube video link"
@@ -515,11 +545,12 @@ const Dashboard = () => {
                     <button onClick={cleanLinkInVideo}>
                         Clean Link
                     </button>
-                </div> */}
+                </div>
 
                 {/* New Section for cleaning link in all video descriptions */}
-                {/* <div className="clean-link-in-all-videos">
-                    <h3>Clean Link in All Video Descriptions</h3>
+                <div className="clean-link-in-all-videos">
+                    <h3>Reset Link in All Video Descriptions</h3>
+                    <p> This will remove any utm parameters from the link in all video descriptions</p>
                     <input
                         type="text"
                         placeholder="Enter target URL"
@@ -529,7 +560,7 @@ const Dashboard = () => {
                     <button onClick={cleanLinkInAllVideos} disabled={isReplacing}>
                         {isReplacing ? 'Cleaning...' : 'Clean Links'}
                     </button>
-                </div>  */}
+                </div> 
             </div>
         </div>
     );
