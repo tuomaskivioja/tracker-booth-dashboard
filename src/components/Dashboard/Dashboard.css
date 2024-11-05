@@ -186,3 +186,54 @@ th:nth-child(4), /* Clicks column */
 th:nth-child(5)  /* Conversions column */ {
     width: 80px;
 }
+
+.youtube-button {
+    background-color: #FF0000; /* Bright red color */
+    color: white;
+    border: none;
+    padding: 10px 20px 10px 45px; /* Adjusted padding to move text inside right a bit */
+    font-size: 16px;
+    cursor: pointer;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.refresh-button {
+    background-color: #FF0000; /* Bright red color */
+    color: white;
+    border: none;
+    padding: 10px 20px 10px 20px; /* Adjusted padding to move text inside right a bit */
+    font-size: 16px;
+    cursor: pointer;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.youtube-button:hover {
+    background-color: #cc0000; /* Darker red on hover */
+}
+
+.refresh-button:hover {
+    background-color: #cc0000; /* Darker red on hover */
+}
+
+.youtube-button::before {
+    content: '';
+    background-image: url('../../../public/Youtube_logo.png'); /* Path to your YouTube logo */
+    background-size: 30px 20px; /* Adjust size as needed */
+    background-repeat: no-repeat;
+    position: absolute;
+    left: 10px; /* Adjust position as needed */
+    width: 30px;
+    height: 20px;
+}

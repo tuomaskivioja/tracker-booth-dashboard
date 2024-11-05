@@ -349,16 +349,20 @@ const Dashboard = () => {
                 <h1>Welcome to Revit!</h1>
                 {youtubeName ? (
                     <div>
-                    <p>Logged in as: {youtubeName}</p>
-                        <button onClick={handleLogout}>Logout from YouTube</button>
+                        <p>Logged in as: {youtubeName}</p>
+                        <button className="youtube-button" onClick={handleLogout}>
+                            Logout from YouTube
+                        </button>
                     </div>
                 ) : (
                     <div>
-                        <button onClick={handleLoginWithYouTube}>Login with YouTube</button>
+                        <button className="youtube-button" onClick={handleLoginWithYouTube}>
+                            Login with YouTube
+                        </button>
                     </div>
                 )}
 
-                <button onClick={refreshYouTubeData} disabled={isRefreshing}>
+                <button className="refresh-button" onClick={refreshYouTubeData} disabled={isRefreshing}>
                     {isRefreshing ? 'Refreshing...' : 'Refresh YouTube Data'}
                 </button>
 
@@ -468,100 +472,102 @@ const Dashboard = () => {
                 )}
             </div>
 
-            <div className="actions-container">
-                {/* Section for adding or updating tracking link to a specific video */}
-                <div className="add-update-link">
-                    <h3>Update Tracking Link for a Specific Video</h3>
-                    <p> This will add the Revit tracking parameter to the link in the video description</p>
-                    <input
-                        type="text"
-                        placeholder="Enter YouTube video link"
-                        value={videoLink}
-                        onChange={(e) => setVideoLink(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Enter landing page URL (without any utm parameters)"
-                        value={landingPage}
-                        onChange={(e) => setLandingPage(e.target.value)}
-                    />
-                    <button onClick={handleLinkAction} disabled={isUpdating}>
-                        {isUpdating ? 'Processing...' : 'Update Link'}
-                    </button>
+            {/* Conditionally render the actions container based on YouTube login status */}
+            {youtubeName && (
+                <div className="actions-container">
+                    {/* Section for adding or updating tracking link to a specific video */}
+                    <div className="add-update-link">
+                        <h3>Update Tracking Link for a Specific Video</h3>
+                        <p> This will add the Revit tracking parameter to the link in the video description</p>
+                        <input
+                            type="text"
+                            placeholder="Enter YouTube video link"
+                            value={videoLink}
+                            onChange={(e) => setVideoLink(e.target.value)}
+                        />
+                        <input
+                            type="text"
+                            placeholder="Enter landing page URL (without any utm parameters)"
+                            value={landingPage}
+                            onChange={(e) => setLandingPage(e.target.value)}
+                        />
+                        <button onClick={handleLinkAction} disabled={isUpdating}>
+                            {isUpdating ? 'Processing...' : 'Update Link'}
+                        </button>
+                    </div>
+                    {/* Section for updating tracking links for all videos */}
+
+                    <div className="update-tracking-links">
+                        <h3>Update Tracking Links for All Videos</h3>
+                        <p> Warning: Only use this after you have tested the link in a specific video using the form above</p>
+                        <input
+                            type="text"
+                            placeholder="Enter landing page URL"
+                            value={landingPage}
+                            onChange={(e) => setLandingPage(e.target.value)}
+                        />
+                        <button onClick={updateTrackingLinksForAllVideos} disabled={isUpdating}>
+                            {isUpdating ? 'Updating...' : 'Update Tracking Links'}
+                        </button>
+                    </div>
+
+                    {/* New Section for Replacing Links in Video Descriptions */}
+                    <div className="replace-link-in-videos">
+                        <h3>Replace Links in Video Descriptions</h3>
+                        <input
+                            type="text"
+                            placeholder="Enter old link"
+                            value={oldLink}
+                            onChange={(e) => setOldLink(e.target.value)}
+                        />
+                        <input
+                            type="text"
+                            placeholder="Enter new link"
+                            value={newLink}
+                            onChange={(e) => setNewLink(e.target.value)}
+                        />
+                        <button onClick={replaceLinksInVideos} disabled={isReplacing}>
+                            {isReplacing ? 'Replacing...' : 'Replace Links'}
+                        </button>
+                    </div>
+
+                    <div className="clean-link-in-video">
+                        <h3>Reset Link in Video Description</h3>
+                        <p> This will remove any utm parameters from the link in the video description</p>
+
+                        <input
+                            type="text"
+                            placeholder="Enter YouTube video link"
+                            value={videoLink}
+                            onChange={(e) => setVideoLink(e.target.value)}
+                        />
+                        <input
+                            type="text"
+                            placeholder="Enter target URL"
+                            value={targetUrl}
+                            onChange={(e) => setTargetUrl(e.target.value)}
+                        />
+                        <button onClick={cleanLinkInVideo}>
+                            Clean Link
+                        </button>
+                    </div>
+
+                    {/* New Section for cleaning link in all video descriptions */}
+                    <div className="clean-link-in-all-videos">
+                        <h3>Reset Link in All Video Descriptions</h3>
+                        <p> This will remove any utm parameters from the link in all video descriptions</p>
+                        <input
+                            type="text"
+                            placeholder="Enter target URL"
+                            value={targetUrlForAll}
+                            onChange={(e) => setTargetUrlForAll(e.target.value)}
+                        />
+                        <button onClick={cleanLinkInAllVideos} disabled={isReplacing}>
+                            {isReplacing ? 'Cleaning...' : 'Clean Links'}
+                        </button>
+                    </div> 
                 </div>
-                {/* Section for updating tracking links for all videos */}
-
-                <div className="update-tracking-links">
-                    <h3>Update Tracking Links for All Videos</h3>
-                    <p> Warning: Only use this after you have tested the link in a specific video using the form above</p>
-                    <input
-                        type="text"
-                        placeholder="Enter landing page URL"
-                        value={landingPage}
-                        onChange={(e) => setLandingPage(e.target.value)}
-                    />
-                    <button onClick={updateTrackingLinksForAllVideos} disabled={isUpdating}>
-                        {isUpdating ? 'Updating...' : 'Update Tracking Links'}
-                    </button>
-                </div>
-
-                {/* New Section for Replacing Links in Video Descriptions */}
-                <div className="replace-link-in-videos">
-                    <h3>Replace Links in Video Descriptions</h3>
-                    <input
-                        type="text"
-                        placeholder="Enter old link"
-                        value={oldLink}
-                        onChange={(e) => setOldLink(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Enter new link"
-                        value={newLink}
-                        onChange={(e) => setNewLink(e.target.value)}
-                    />
-                    <button onClick={replaceLinksInVideos} disabled={isReplacing}>
-                        {isReplacing ? 'Replacing...' : 'Replace Links'}
-                    </button>
-                </div>
-
-                
-                <div className="clean-link-in-video">
-                    <h3>Reset Link in Video Description</h3>
-                    <p> This will remove any utm parameters from the link in the video description</p>
-
-                    <input
-                        type="text"
-                        placeholder="Enter YouTube video link"
-                        value={videoLink}
-                        onChange={(e) => setVideoLink(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Enter target URL"
-                        value={targetUrl}
-                        onChange={(e) => setTargetUrl(e.target.value)}
-                    />
-                    <button onClick={cleanLinkInVideo}>
-                        Clean Link
-                    </button>
-                </div>
-
-                {/* New Section for cleaning link in all video descriptions */}
-                <div className="clean-link-in-all-videos">
-                    <h3>Reset Link in All Video Descriptions</h3>
-                    <p> This will remove any utm parameters from the link in all video descriptions</p>
-                    <input
-                        type="text"
-                        placeholder="Enter target URL"
-                        value={targetUrlForAll}
-                        onChange={(e) => setTargetUrlForAll(e.target.value)}
-                    />
-                    <button onClick={cleanLinkInAllVideos} disabled={isReplacing}>
-                        {isReplacing ? 'Cleaning...' : 'Clean Links'}
-                    </button>
-                </div> 
-            </div>
+            )}
         </div>
     );
 };
