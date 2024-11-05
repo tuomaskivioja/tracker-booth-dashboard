@@ -460,6 +460,7 @@ const Dashboard = () => {
                     <div className="add-update-link">
                         <h3>Update Tracking Link for a Specific Video</h3>
                         <p> This will add the Revit tracking parameter to the link in the video description</p>
+                        <p> NOTE: Make sure there is a space immediately after the link in your description.</p>
                         <input
                             type="text"
                             placeholder="Enter YouTube video link"
@@ -481,6 +482,7 @@ const Dashboard = () => {
                     <div className="update-tracking-links">
                         <h3>Update Tracking Links for All Videos</h3>
                         <p> Warning: Only use this after you have tested the link in a specific video using the form above</p>
+                        <p> NOTE: Make sure there is a space immediately after the link in your descriptions.</p>
                         <input
                             type="text"
                             placeholder="Enter landing page URL"
