@@ -237,3 +237,45 @@ th:nth-child(5)  /* Conversions column */ {
     width: 30px;
     height: 20px;
 }
+
+.date-filter-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.date-range-picker {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.react-datepicker {
+    font-size: 10px; /* Adjust the font size */
+}
+
+/* Style the navigation arrows */
+.react-datepicker__navigation {
+    top: 10px; /* Adjust the top position */
+    width: 20px; /* Adjust the width */
+    height: 20px; /* Adjust the height */
+}
+
+/* Style the navigation arrow icons */
+.react-datepicker__navigation-icon::before {
+    border-width: 2px; /* Adjust the thickness of the arrow */
+}
+
+/* Adjust the calendar size */
+.react-datepicker__month-container {
+    width: 280px;
+}
+
+/* Adjust the size of the day cells */
+.react-datepicker__day {
+    width: 2.5rem; /* Adjust the width */
+    height: 2.5rem; /* Adjust the height */
+    line-height: 2.5rem; /* Center the text vertically */
+}

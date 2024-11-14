@@ -3,6 +3,8 @@ import { useUser } from '@clerk/clerk-react'; // Clerk authentication
 import './Dashboard.css'; // Importing CSS file
 import axios from 'axios';
 import { fetchOffers } from '../../utils/apiCalls';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
@@ -32,6 +34,9 @@ const Dashboard = () => {
     const [targetUrl, setTargetUrl] = useState(''); // State for target URL input
     const [targetUrlForAll, setTargetUrlForAll] = useState(''); // State for target URL input for all videos
     const [toggledRows, setToggledRows] = useState({}); // State to track toggled rows
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+    const [isDateFiltered, setIsDateFiltered] = useState(false); // State to track if date filter is applied
 
     // Function to extract video ID from YouTube URL
     const extractVideoId = (url) => {
@@ -77,33 +82,6 @@ const Dashboard = () => {
         } catch (error) {
             setError(error.message);
             setLoading(false);
-        }
-    };
-
-    const fetchVideoById = async () => {
-        try {
-            const config = {
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                withCredentials: true,
-            };
-    
-            const response = await axios.get(`https://${SERVER_URL}/api/youtube-video/${videoId}`, config);
-    
-            console.log('Video Details:', response.data);
-            setVideoDetails(response.data);
-        } catch (error) {
-            if (error.response) {
-                console.error('Error response:', error.response.data);
-                setError(`Error: ${error.response.data.message || 'Fetching video failed'}`);
-            } else if (error.request) {
-                console.error('Error request:', error.request);
-                setError('Error: No response from the server');
-            } else {
-                console.error('Error message:', error.message);
-                setError('Error fetching video.');
-            }
         }
     };
 
@@ -332,6 +310,40 @@ const Dashboard = () => {
         }));
     };
 
+    // Function to fetch data based on date range
+    const fetchDataByDateRange = async (start, end) => {
+        try {
+            const response = await axios.get(`https://${SERVER_URL}/api/sales-data-by-date`, {
+                params: {
+                    username: username,
+                    startDate: start.toISOString(),
+                    endDate: end.toISOString(),
+                },
+            });
+
+            const data = response.data;
+            console.log('date-ranged data', data);
+            setSalesData(data);
+            setIsDateFiltered(true); // Set date filter state to true
+        } catch (error) {
+            console.error('Error fetching data by date range:', error);
+            setError('Error fetching data by date range');
+        }
+    };
+
+    const handleDateFilterSubmit = () => {
+        if (startDate && endDate) {
+            fetchDataByDateRange(startDate, endDate);
+        }
+    };
+
+    const resetDateFilter = () => {
+        setStartDate(null);
+        setEndDate(null);
+        setIsDateFiltered(false); // Reset date filter state
+        fetchSalesData(username); // Fetch all data
+    };
+
     // Check if Clerk's user data is loaded
     if (!isLoaded) {
         return <p>Loading user info...</p>;
@@ -342,7 +354,6 @@ const Dashboard = () => {
         return <div>Not signed in</div>;
     }
 
-    // If signed in, display the sales and clicks dashboard and user's name
     return (
         <div className="dashboard-container">
             <div className="table-container">
@@ -367,6 +378,7 @@ const Dashboard = () => {
                 </button>
 
                 <h2>Sales and Clicks Dashboard</h2>
+
                 {/* Category Filter Dropdown */}
                 <div className="filter-container">
                     <label htmlFor="category-filter">Filter by Category:</label>
@@ -402,6 +414,46 @@ const Dashboard = () => {
                         ))}
                     </select>
                 </div>
+
+                {/* Date Filter Button */}
+            
+
+                {/* Date Range Picker */}
+     
+                    <div className="date-range-picker">
+                        <label htmlFor="start-date">Start Date:</label>
+                        <DatePicker
+                            selected={startDate}
+                            onChange={(date) => setStartDate(date)}
+                            selectsStart
+                            startDate={startDate}
+                            endDate={endDate}
+                            dateFormat="yyyy/MM/dd"
+                            placeholderText="Select start date"
+                        />
+                        <label htmlFor="end-date">End Date:</label>
+                        <DatePicker
+                            selected={endDate}
+                            onChange={(date) => setEndDate(date)}
+                            selectsEnd
+                            startDate={startDate}
+                            endDate={endDate}
+                            minDate={startDate}
+                            dateFormat="yyyy/MM/dd"
+                            placeholderText="Select end date"
+                        />
+                        <button onClick={handleDateFilterSubmit}>Apply filter</button>
+                    </div>
+           
+
+                {isDateFiltered && (
+                    <div className="date-filter-info">
+                        <span>
+                            Date Range: {startDate?.toLocaleDateString()} - {endDate?.toLocaleDateString()}
+                        </span>
+                        <button onClick={resetDateFilter}>x</button>
+                    </div>
+                )}
 
                 {loading ? (
                     <p className="loading-message">Loading data...</p>
