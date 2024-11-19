@@ -21,7 +21,6 @@ function App() {
           </SignedOut>
           <SignedIn>
             <Sidebar />
-            <SignOutButton style={{ backgroundColor: '#e74c3c' }} />
             <div className="content">
               <Routes>
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
