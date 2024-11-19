@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useRevit } from '../../contexts/RevitContext';
 
 const ActionsContainer = ({ youtubeName, setSalesData }) => {
     const [videoLink, setVideoLink] = useState('');
@@ -10,6 +11,8 @@ const ActionsContainer = ({ youtubeName, setSalesData }) => {
     const [isReplacing, setIsReplacing] = useState(false);
     const [targetUrl, setTargetUrl] = useState('');
     const [targetUrlForAll, setTargetUrlForAll] = useState('');
+
+    const { username } = useRevit();
 
     const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
@@ -29,7 +32,7 @@ const ActionsContainer = ({ youtubeName, setSalesData }) => {
         setIsUpdating(true);
         try {
             const response = await axios.put(`https://${SERVER_URL}/api/update-video-description/${videoId}`, {
-                userId: youtubeName,
+                userId: username,
                 url: landingPage
             });
             alert(response.data.message);
@@ -45,7 +48,7 @@ const ActionsContainer = ({ youtubeName, setSalesData }) => {
         setIsUpdating(true);
         try {
             const response = await axios.put(`https://${SERVER_URL}/api/add-tracking-to-videos`, {
-                userId: youtubeName,
+                userId: username,
                 url: landingPage
             });
             alert(response.data.message);
@@ -61,7 +64,7 @@ const ActionsContainer = ({ youtubeName, setSalesData }) => {
         setIsReplacing(true);
         try {
             const response = await axios.put(`https://${SERVER_URL}/api/replace-link-in-videos`, {
-                userId: youtubeName,
+                userId: username,
                 oldLink,
                 newLink
             });
@@ -83,7 +86,7 @@ const ActionsContainer = ({ youtubeName, setSalesData }) => {
 
         try {
             const response = await axios.put(`https://${SERVER_URL}/api/clean-link-in-video/${videoId}`, {
-                userId: youtubeName,
+                userId: username,
                 targetUrl
             });
 
@@ -98,7 +101,7 @@ const ActionsContainer = ({ youtubeName, setSalesData }) => {
         setIsReplacing(true);
         try {
             const response = await axios.put(`https://${SERVER_URL}/api/clean-link-in-all-videos`, {
-                userId: youtubeName,
+                userId: username,
                 targetUrl: targetUrlForAll
             });
 
