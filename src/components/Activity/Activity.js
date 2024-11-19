@@ -15,7 +15,6 @@ const Activity = () => {
         const fetchLatestConversions = async () => {
             try {
                 const response = await axios.get(`https://${SERVER_URL}/api/get-latest-conversions/${username}`);
-                console.log(response.data);
                 setConversions(response.data);
             } catch (err) {
                 console.error('Error fetching latest conversions:', err);
@@ -33,7 +32,7 @@ const Activity = () => {
             <ul>
                 {conversions.map((conversion, index) => (
                     <li key={index}>
-                        <strong>{conversion.offer_name}</strong> conversion from <strong>{conversion.resource_type}</strong> <strong>{conversion.youtube_title ? conversion.youtube_title : conversion.resource_name}</strong> on {new Date(conversion.timestamp).toLocaleString()}
+                        <strong>{conversion.offer_name}</strong> conversion from {conversion.resource_type} <strong>{conversion.youtube_title ? conversion.youtube_title : conversion.resource_name}</strong> on {new Date(conversion.timestamp).toLocaleString()}
                     </li>
                 ))}
             </ul>
