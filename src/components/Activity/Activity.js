@@ -33,7 +33,7 @@ const Activity = () => {
             <ul>
                 {conversions.map((conversion, index) => (
                     <li key={index}>
-                        {conversion.offer_name} conversion from {conversion.resource_type} {conversion.resource_name} at {new Date(conversion.timestamp).toLocaleString()}
+                        <strong>{conversion.offer_name}</strong> conversion from <strong>{conversion.resource_type}</strong> <strong>{conversion.youtube_title ? conversion.youtube_title : conversion.resource_name}</strong> on {new Date(conversion.timestamp).toLocaleString()}
                     </li>
                 ))}
             </ul>
