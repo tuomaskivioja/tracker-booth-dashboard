@@ -6,7 +6,7 @@ import PrivacyPolicy from './components/PrivacyPolicy/PrivacyPolicy';
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { SignedIn, SignedOut, SignOutButton, useUser } from "@clerk/clerk-react";
 import SignInPage from './components/SignIn/SignIn';
-
+import Activity from './components/Activity/Activity';
 function App() {
     const { isSignedIn, user, isLoaded } = useUser();
 
@@ -27,6 +27,7 @@ function App() {
                 <Route path="/" element={<Navigate to="/dashboard" />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/code" element={<Code />} />
+                <Route path="/activity" element={<Activity />} />
               </Routes>
             </div>
           </SignedIn>

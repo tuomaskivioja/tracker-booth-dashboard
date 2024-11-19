@@ -18,6 +18,11 @@ const Sidebar = () => {
                         Code
                     </NavLink>
                 </li>
+                <li>
+                    <NavLink to="/activity" activeClassName="active">
+                        Conversion activity
+                    </NavLink>
+                </li>
             </ul>
             <SignOutButton displayName="Sign out from Revit" style={{ backgroundColor: '#e74c3c' }} />
             <div className="footer">

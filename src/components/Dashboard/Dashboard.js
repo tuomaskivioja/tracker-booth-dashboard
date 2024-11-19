@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react'; // Clerk authentication
+import React, { useState, useEffect } from 'react';// Clerk authentication
 import './Dashboard.css'; // Importing CSS file
 import axios from 'axios';
 import { fetchOffers } from '../../utils/apiCalls';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-
+import { useRevit } from '../../contexts/RevitContext';
 const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
-const Dashboard = () => {
-    const { isSignedIn, user, isLoaded } = useUser(); // Clerk authentication
+const Dashboard = () => { // Clerk authentication
 
     const [salesData, setSalesData] = useState([]);
     const [filterType, setFilterType] = useState('all');
@@ -19,7 +17,6 @@ const Dashboard = () => {
     const [videoId, setVideoId] = useState('');  // Video ID state
     const [videoDetails, setVideoDetails] = useState(null); 
     const [youtubeName, setYoutubeName] = useState(null); // State for YouTube name
-    const [username, setUsername] = useState('');
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
     const [landingPage, setLandingPage] = useState(''); // State for landing page input
     const [cta, setCta] = useState(''); // State for CTA input
@@ -36,7 +33,9 @@ const Dashboard = () => {
     const [toggledRows, setToggledRows] = useState({}); // State to track toggled rows
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
-    const [isDateFiltered, setIsDateFiltered] = useState(false); // State to track if date filter is applied
+    const [isDateFiltered, setIsDateFiltered] = useState(false);
+
+    const { username } = useRevit();  // State to track if date filter is applied
 
     // Function to extract video ID from YouTube URL
     const extractVideoId = (url) => {
@@ -142,13 +141,6 @@ const Dashboard = () => {
             setIsUpdating(false); // Reset updating state
         }
     };
-
-    // useEffect to update the username to user.id once the user is loaded
-    useEffect(() => {
-        if (isLoaded && isSignedIn) {
-            setUsername(user.id);
-        }
-    }, [isLoaded, isSignedIn, user]);
 
     // useEffect to fetch sales data and offers once the username is set/changed
     useEffect(() => {
@@ -299,7 +291,7 @@ const Dashboard = () => {
 
     // Define the function before using it
     const handleLoginWithYouTube = () => {
-        const url = `https://${SERVER_URL}/api/auth?userId=${user.id}`;
+        const url = `https://${SERVER_URL}/api/auth?userId=${username}`;
         window.open(url, '_blank');
     };
 
@@ -343,16 +335,6 @@ const Dashboard = () => {
         setIsDateFiltered(false); // Reset date filter state
         fetchSalesData(username); // Fetch all data
     };
-
-    // Check if Clerk's user data is loaded
-    if (!isLoaded) {
-        return <p>Loading user info...</p>;
-    }
-
-    // If not signed in, show a message
-    if (!isSignedIn) {
-        return <div>Not signed in</div>;
-    }
 
     return (
         <div className="dashboard-container">

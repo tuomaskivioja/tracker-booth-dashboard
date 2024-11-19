@@ -1,0 +1,31 @@
+/* dashboard/react-dashboard/src/components/Activity/Activity.css */
+
+.activity-container {
+    margin-left: 280px; /* Adjust this value to match the width of your sidebar */
+    padding: 20px;
+    min-height: 100vh; /* Ensure it covers the full height of the viewport */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.activity-container h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.activity-container ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.activity-container li {
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.error-message {
+    color: red;
+    font-weight: bold;
+}
