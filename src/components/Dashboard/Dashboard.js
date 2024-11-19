@@ -1,189 +1,56 @@
-import React, { useState, useEffect } from 'react';// Clerk authentication
-import './Dashboard.css'; // Importing CSS file
+import React, { useState, useEffect } from 'react';
+import './Dashboard.css';
 import axios from 'axios';
-import { fetchOffers } from '../../utils/apiCalls';
+import { fetchSalesData, handleLoginWithYouTube, fetchDataByDateRange, handleLogout, checkYouTubeLogin } from '../../utils/apiCalls';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useRevit } from '../../contexts/RevitContext';
+import ActionsContainer from './ActionsContainer';
 const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
-const Dashboard = () => { // Clerk authentication
-
-    const [salesData, setSalesData] = useState([]);
+const Dashboard = () => {
+    const [youtubeName, setYoutubeName] = useState(null);
     const [filterType, setFilterType] = useState('all');
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [videoLink, setVideoLink] = useState('');  // Video link state
-    const [videoId, setVideoId] = useState('');  // Video ID state
-    const [videoDetails, setVideoDetails] = useState(null); 
-    const [youtubeName, setYoutubeName] = useState(null); // State for YouTube name
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
-    const [landingPage, setLandingPage] = useState(''); // State for landing page input
-    const [cta, setCta] = useState(''); // State for CTA input
-    const [isRefreshing, setIsRefreshing] = useState(false); // State for refresh button
-    const [linkAction, setLinkAction] = useState('new'); // State for link action
-    const [isUpdating, setIsUpdating] = useState(false); // State for update button
-    const [offers, setOffers] = useState([]); // State for offers
-    const [selectedOffer, setSelectedOffer] = useState('all'); // State for selected offer
-    const [oldLink, setOldLink] = useState('');
-    const [newLink, setNewLink] = useState('');
-    const [isReplacing, setIsReplacing] = useState(false);
-    const [targetUrl, setTargetUrl] = useState(''); // State for target URL input
-    const [targetUrlForAll, setTargetUrlForAll] = useState(''); // State for target URL input for all videos
-    const [toggledRows, setToggledRows] = useState({}); // State to track toggled rows
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [selectedOffer, setSelectedOffer] = useState('all');
+    const [toggledRows, setToggledRows] = useState({});
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [isDateFiltered, setIsDateFiltered] = useState(false);
 
-    const { username } = useRevit();  // State to track if date filter is applied
+    const { username, salesData, offers, setSalesData } = useRevit();
 
-    // Function to extract video ID from YouTube URL
-    const extractVideoId = (url) => {
-        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|.+\?v=)?|youtu\.be\/)([^&\n?#]+)/;
-        const match = url.match(regex);
-        return match ? match[1] : null;
-    };
+    
 
-    const handleLogout = async () => {
-        try {
-            const response = await axios.post(`https://${SERVER_URL}/api/logout-youtube`, { userId: username });
-            if (response.data.success) {
-                console.log('Logged out successfully');
-                // Optionally, redirect the user or update the UI
-            }
-        } catch (error) {
-            console.error('Error logging out:', error);
-        }
-    };
-
-    // Fetch sales data from the server
-    const fetchSalesData = async (username) => {
-        try {
-            const response = await fetch(`https://${SERVER_URL}/api/sales/${username}`, { withCredentials: true });
-            if (!response.ok) {
-                throw new Error('Failed to fetch sales data');
-            }
-            const data = await response.json();
-
-            // Convert click_count and sale_count to numbers
-            const formattedData = data.map(resource => ({
-                ...resource,
-                offers: resource.offers.map(offer => ({
-                    ...offer,
-                    click_count: Number(offer.click_count),
-                    sale_count: Number(offer.sale_count)
-                }))
-            }));
-
-            console.log(formattedData);
-            setSalesData(formattedData);
-            setLoading(false);
-        } catch (error) {
-            setError(error.message);
-            setLoading(false);
-        }
-    };
-
-    // Function to refresh YouTube data
     const refreshYouTubeData = async () => {
-        setIsRefreshing(true); // Set refreshing state to true
+        setIsRefreshing(true);
         try {
             const response = await axios.post(`https://${SERVER_URL}/api/refresh-yt-data/${username}`);
             alert(response.data.message);
-            fetchSalesData(username); // Refresh sales data after updating YouTube data
+            const data = await fetchSalesData(username);
+            setSalesData(data);
         } catch (error) {
             console.error('Error refreshing YouTube data:', error);
             alert('Error refreshing YouTube data');
         } finally {
-            setIsRefreshing(false); // Reset refreshing state
+            setIsRefreshing(false);
         }
     };
-
-    // Function to update tracking links for all videos
-    const updateTrackingLinksForAllVideos = async () => {
-        setIsUpdating(true); // Set updating state to true
-        try {
-            const response = await axios.put(`https://${SERVER_URL}/api/add-tracking-to-videos`, {
-                userId: username,
-                url: landingPage
-            });
-            alert(response.data.message);
-        } catch (error) {
-            console.error('Error updating tracking links:', error);
-            alert('Error updating tracking links');
-        } finally {
-            setIsUpdating(false); // Reset updating state
-        }
-    };
-
-    // Function to handle link action
-    const handleLinkAction = async () => {
-        console.log(username)
-        const videoId = extractVideoId(videoLink);
-        if (!videoId) {
-            alert('Invalid YouTube video link');
-            return;
-        }
-        setVideoId(videoId); // Set the extracted video ID
-
-        setIsUpdating(true); // Set updating state to true
-        try {
-            // Update existing link
-            const response = await axios.put(`https://${SERVER_URL}/api/update-video-description/${videoId}`, {
-                userId: username,
-                url: landingPage
-            });
-            alert(response.data.message);
-        } catch (error) {
-            console.error('Error handling link action:', error);
-            alert('Error handling link action');
-        } finally {
-            setIsUpdating(false); // Reset updating state
-        }
-    };
-
-    // useEffect to fetch sales data and offers once the username is set/changed
-    useEffect(() => {
-        if (username) {
-            fetchSalesData(username);
-        }
-    }, [username]);
 
     useEffect(() => {
-        const loadOffers = async () => {
+        const fetchData = async () => {
             if (username) {
-                try {
-                    const userOffers = await fetchOffers(username);
-                    setOffers(userOffers);
-                } catch (error) {
-                    console.error('Error loading offers:', error);
+                const data = await checkYouTubeLogin(username);
+                if (data && data.loggedIn) {
+                    setYoutubeName(data.youtubeName);
                 }
             }
         };
- 
-        loadOffers();
+        fetchData();
     }, [username]);
 
-    // useEffect to check YouTube login status
-    useEffect(() => {
-        const checkYouTubeLogin = async () => {
-            try {
-                const response = await axios.post(`https://${SERVER_URL}/api/check-yt-login`, { userId: username });
-                if (response.data.loggedIn) {
-                    console.log(response.data);
-                    setYoutubeName(response.data.youtubeName);
-                }
-            } catch (error) {
-                console.error('Error checking YouTube login:', error);
-            }
-        };
-
-        if (username) {
-            checkYouTubeLogin();
-        }
-    }, [username]);
-
-    // Filter and aggregate sales data based on selected offer
     const filteredSales = salesData.map((resource) => {
         let totalClicks = 0;
         let totalSales = 0;
@@ -201,7 +68,6 @@ const Dashboard = () => { // Clerk authentication
             totalSales,
         };
     }).filter((resource) => {
-        // Exclude resources where both clicks and sales are zero
         return (resource.totalClicks > 0 || resource.totalSales > 0) &&
                (filterType === 'all' || resource.category === filterType);
     });
@@ -210,8 +76,8 @@ const Dashboard = () => { // Clerk authentication
         let sortableSales = [...filteredSales];
         if (sortConfig.key !== null) {
             sortableSales.sort((a, b) => {
-                const aValue = Number(a[sortConfig.key]) || 0; // Convert to number, default to 0 if NaN
-                const bValue = Number(b[sortConfig.key]) || 0; // Convert to number, default to 0 if NaN
+                const aValue = Number(a[sortConfig.key]) || 0;
+                const bValue = Number(b[sortConfig.key]) || 0;
 
                 if (aValue < bValue) {
                     return sortConfig.direction === 'ascending' ? -1 : 1;
@@ -233,68 +99,6 @@ const Dashboard = () => { // Clerk authentication
         setSortConfig({ key, direction });
     };
 
-    const replaceLinksInVideos = async () => {
-        setIsReplacing(true); // Set replacing state to true
-        try {
-            const response = await axios.put(`https://${SERVER_URL}/api/replace-link-in-videos`, {
-                userId: username,
-                oldLink,
-                newLink
-            });
-            alert(response.data.message);
-        } catch (error) {
-            console.error('Error replacing links:', error);
-            alert('Error replacing links');
-        } finally {
-            setIsReplacing(false); // Reset replacing state
-        }
-    };
-
-    // Function to clean link in video description
-    const cleanLinkInVideo = async () => {
-        const videoId = extractVideoId(videoLink);
-        if (!videoId) {
-            alert('Invalid YouTube video link');
-            return;
-        }
-
-        try {
-            const response = await axios.put(`https://${SERVER_URL}/api/clean-link-in-video/${videoId}`, {
-                userId: username,
-                targetUrl
-            });
-
-            alert(response.data.message);
-        } catch (error) {
-            console.error('Error cleaning link in video:', error);
-            alert('Error cleaning link in video');
-        }
-    };
-
-    // Function to clean link in all video descriptions
-    const cleanLinkInAllVideos = async () => {
-        setIsReplacing(true); // Set replacing state to true
-        try {
-            const response = await axios.put(`https://${SERVER_URL}/api/clean-link-in-all-videos`, {
-                userId: username,
-                targetUrl: targetUrlForAll
-            });
-
-            alert(response.data.message);
-        } catch (error) {
-            console.error('Error cleaning links in all videos:', error);
-            alert('Error cleaning links in all videos');
-        } finally {
-            setIsReplacing(false); // Reset replacing state
-        }
-    };
-
-    // Define the function before using it
-    const handleLoginWithYouTube = () => {
-        const url = `https://${SERVER_URL}/api/auth?userId=${username}`;
-        window.open(url, '_blank');
-    };
-
     const toggleRow = (index) => {
         setToggledRows(prevState => ({
             ...prevState,
@@ -302,38 +106,20 @@ const Dashboard = () => { // Clerk authentication
         }));
     };
 
-    // Function to fetch data based on date range
-    const fetchDataByDateRange = async (start, end) => {
-        try {
-            const response = await axios.get(`https://${SERVER_URL}/api/sales-data-by-date`, {
-                params: {
-                    username: username,
-                    startDate: start.toISOString(),
-                    endDate: end.toISOString(),
-                },
-            });
-
-            const data = response.data;
-            console.log('date-ranged data', data);
-            setSalesData(data);
-            setIsDateFiltered(true); // Set date filter state to true
-        } catch (error) {
-            console.error('Error fetching data by date range:', error);
-            setError('Error fetching data by date range');
-        }
-    };
-
-    const handleDateFilterSubmit = () => {
+    const handleDateFilterSubmit = async () => {
         if (startDate && endDate) {
-            fetchDataByDateRange(startDate, endDate);
+            const data = await fetchDataByDateRange(username, startDate, endDate);
+            setSalesData(data);
+            setIsDateFiltered(true);
         }
     };
 
-    const resetDateFilter = () => {
+    const resetDateFilter = async () => {
         setStartDate(null);
         setEndDate(null);
-        setIsDateFiltered(false); // Reset date filter state
-        fetchSalesData(username); // Fetch all data
+        setIsDateFiltered(false);
+        const data = await fetchSalesData(username);
+        setSalesData(data);
     };
 
     return (
@@ -343,13 +129,13 @@ const Dashboard = () => { // Clerk authentication
                 {youtubeName ? (
                     <div>
                         <p>Logged in as: {youtubeName}</p>
-                        <button className="youtube-button" onClick={handleLogout}>
+                        <button className="youtube-button" onClick={() => handleLogout(username)}>
                             Logout from YouTube
                         </button>
                     </div>
                 ) : (
                     <div>
-                        <button className="youtube-button" onClick={handleLoginWithYouTube}>
+                        <button className="youtube-button" onClick={() => handleLoginWithYouTube(username)}>
                             Login with YouTube
                         </button>
                     </div>
@@ -361,7 +147,6 @@ const Dashboard = () => { // Clerk authentication
 
                 <h2>Sales and Clicks Dashboard</h2>
 
-                {/* Category Filter Dropdown */}
                 <div className="filter-container">
                     <label htmlFor="category-filter">Filter by Category:</label>
                     <select
@@ -376,11 +161,9 @@ const Dashboard = () => { // Clerk authentication
                         <option value="channel">Channel</option>
                         <option value="twitter">Twitter</option>
                         <option value="instagram">Instagram</option>
-                        {/* Add more categories as needed */}
                     </select>
                 </div>
 
-                {/* Offer Filter Dropdown */}
                 <div className="filter-container">
                     <label htmlFor="offer-filter">Filter by Offer:</label>
                     <select
@@ -437,9 +220,7 @@ const Dashboard = () => { // Clerk authentication
                     </div>
                 )}
 
-                {loading ? (
-                    <p className="loading-message">Loading data...</p>
-                ) : error ? (
+                {error ? (
                     <p className="error-message">{error}</p>
                 ) : (
                     <table>
@@ -491,103 +272,11 @@ const Dashboard = () => { // Clerk authentication
                 )}
             </div>
 
-            {/* Conditionally render the actions container based on YouTube login status */}
             {youtubeName && (
-                <div className="actions-container">
-                    {/* Section for adding or updating tracking link to a specific video */}
-                    <div className="add-update-link">
-                        <h3>Update Tracking Link for a Specific Video</h3>
-                        <p> This will add the Revit tracking parameter to the link in the video description</p>
-                        <p> NOTE: Make sure there is a space immediately after the link in your description.</p>
-                        <input
-                            type="text"
-                            placeholder="Enter YouTube video link"
-                            value={videoLink}
-                            onChange={(e) => setVideoLink(e.target.value)}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Enter landing page URL (without any utm parameters)"
-                            value={landingPage}
-                            onChange={(e) => setLandingPage(e.target.value)}
-                        />
-                        <button onClick={handleLinkAction} disabled={isUpdating}>
-                            {isUpdating ? 'Processing...' : 'Update Link'}
-                        </button>
-                    </div>
-                    {/* Section for updating tracking links for all videos */}
-
-                    <div className="update-tracking-links">
-                        <h3>Update Tracking Links for All Videos</h3>
-                        <p> Warning: Only use this after you have tested the link in a specific video using the form above</p>
-                        <p> NOTE: Make sure there is a space immediately after the link in your descriptions.</p>
-                        <input
-                            type="text"
-                            placeholder="Enter landing page URL"
-                            value={landingPage}
-                            onChange={(e) => setLandingPage(e.target.value)}
-                        />
-                        <button onClick={updateTrackingLinksForAllVideos} disabled={isUpdating}>
-                            {isUpdating ? 'Updating...' : 'Update Tracking Links'}
-                        </button>
-                    </div>
-
-                    {/* New Section for Replacing Links in Video Descriptions */}
-                    <div className="replace-link-in-videos">
-                        <h3>Replace Links in Video Descriptions</h3>
-                        <input
-                            type="text"
-                            placeholder="Enter old link"
-                            value={oldLink}
-                            onChange={(e) => setOldLink(e.target.value)}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Enter new link"
-                            value={newLink}
-                            onChange={(e) => setNewLink(e.target.value)}
-                        />
-                        <button onClick={replaceLinksInVideos} disabled={isReplacing}>
-                            {isReplacing ? 'Replacing...' : 'Replace Links'}
-                        </button>
-                    </div>
-
-                    <div className="clean-link-in-video">
-                        <h3>Reset Link in Video Description</h3>
-                        <p> This will remove any utm parameters from the link in the video description</p>
-
-                        <input
-                            type="text"
-                            placeholder="Enter YouTube video link"
-                            value={videoLink}
-                            onChange={(e) => setVideoLink(e.target.value)}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Enter target URL"
-                            value={targetUrl}
-                            onChange={(e) => setTargetUrl(e.target.value)}
-                        />
-                        <button onClick={cleanLinkInVideo}>
-                            Clean Link
-                        </button>
-                    </div>
-
-                    {/* New Section for cleaning link in all video descriptions */}
-                    <div className="clean-link-in-all-videos">
-                        <h3>Reset Link in All Video Descriptions</h3>
-                        <p> This will remove any utm parameters from the link in all video descriptions</p>
-                        <input
-                            type="text"
-                            placeholder="Enter target URL"
-                            value={targetUrlForAll}
-                            onChange={(e) => setTargetUrlForAll(e.target.value)}
-                        />
-                        <button onClick={cleanLinkInAllVideos} disabled={isReplacing}>
-                            {isReplacing ? 'Cleaning...' : 'Clean Links'}
-                        </button>
-                    </div> 
-                </div>
+                <ActionsContainer
+                    youtubeName={youtubeName}
+                    setSalesData={setSalesData}
+                />
             )}
         </div>
     );

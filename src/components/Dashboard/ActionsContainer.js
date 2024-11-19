@@ -1,0 +1,212 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+
+const ActionsContainer = ({ youtubeName, setSalesData }) => {
+    const [videoLink, setVideoLink] = useState('');
+    const [landingPage, setLandingPage] = useState('');
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [oldLink, setOldLink] = useState('');
+    const [newLink, setNewLink] = useState('');
+    const [isReplacing, setIsReplacing] = useState(false);
+    const [targetUrl, setTargetUrl] = useState('');
+    const [targetUrlForAll, setTargetUrlForAll] = useState('');
+
+    const SERVER_URL = process.env.REACT_APP_SERVER_URL;
+
+    const extractVideoId = (url) => {
+        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|.+\?v=)?|youtu\.be\/)([^&\n?#]+)/;
+        const match = url.match(regex);
+        return match ? match[1] : null;
+    };
+
+    const handleLinkAction = async () => {
+        const videoId = extractVideoId(videoLink);
+        if (!videoId) {
+            alert('Invalid YouTube video link');
+            return;
+        }
+
+        setIsUpdating(true);
+        try {
+            const response = await axios.put(`https://${SERVER_URL}/api/update-video-description/${videoId}`, {
+                userId: youtubeName,
+                url: landingPage
+            });
+            alert(response.data.message);
+        } catch (error) {
+            console.error('Error handling link action:', error);
+            alert('Error handling link action');
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    const updateTrackingLinksForAllVideos = async () => {
+        setIsUpdating(true);
+        try {
+            const response = await axios.put(`https://${SERVER_URL}/api/add-tracking-to-videos`, {
+                userId: youtubeName,
+                url: landingPage
+            });
+            alert(response.data.message);
+        } catch (error) {
+            console.error('Error updating tracking links:', error);
+            alert('Error updating tracking links');
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    const replaceLinksInVideos = async () => {
+        setIsReplacing(true);
+        try {
+            const response = await axios.put(`https://${SERVER_URL}/api/replace-link-in-videos`, {
+                userId: youtubeName,
+                oldLink,
+                newLink
+            });
+            alert(response.data.message);
+        } catch (error) {
+            console.error('Error replacing links:', error);
+            alert('Error replacing links');
+        } finally {
+            setIsReplacing(false);
+        }
+    };
+
+    const cleanLinkInVideo = async () => {
+        const videoId = extractVideoId(videoLink);
+        if (!videoId) {
+            alert('Invalid YouTube video link');
+            return;
+        }
+
+        try {
+            const response = await axios.put(`https://${SERVER_URL}/api/clean-link-in-video/${videoId}`, {
+                userId: youtubeName,
+                targetUrl
+            });
+
+            alert(response.data.message);
+        } catch (error) {
+            console.error('Error cleaning link in video:', error);
+            alert('Error cleaning link in video');
+        }
+    };
+
+    const cleanLinkInAllVideos = async () => {
+        setIsReplacing(true);
+        try {
+            const response = await axios.put(`https://${SERVER_URL}/api/clean-link-in-all-videos`, {
+                userId: youtubeName,
+                targetUrl: targetUrlForAll
+            });
+
+            alert(response.data.message);
+        } catch (error) {
+            console.error('Error cleaning links in all videos:', error);
+            alert('Error cleaning links in all videos');
+        } finally {
+            setIsReplacing(false);
+        }
+    };
+
+    return (
+        <div className="actions-container">
+            {/* Section for adding or updating tracking link to a specific video */}
+            <div className="add-update-link">
+                <h3>Update Tracking Link for a Specific Video</h3>
+                <p> This will add the Revit tracking parameter to the link in the video description</p>
+                <p> NOTE: Make sure there is a space immediately after the link in your description.</p>
+                <input
+                    type="text"
+                    placeholder="Enter YouTube video link"
+                    value={videoLink}
+                    onChange={(e) => setVideoLink(e.target.value)}
+                />
+                <input
+                    type="text"
+                    placeholder="Enter landing page URL (without any utm parameters)"
+                    value={landingPage}
+                    onChange={(e) => setLandingPage(e.target.value)}
+                />
+                <button onClick={handleLinkAction} disabled={isUpdating}>
+                    {isUpdating ? 'Processing...' : 'Update Link'}
+                </button>
+            </div>
+            {/* Section for updating tracking links for all videos */}
+            <div className="update-tracking-links">
+                <h3>Update Tracking Links for All Videos</h3>
+                <p> Warning: Only use this after you have tested the link in a specific video using the form above</p>
+                <p> NOTE: Make sure there is a space immediately after the link in your descriptions.</p>
+                <input
+                    type="text"
+                    placeholder="Enter landing page URL"
+                    value={landingPage}
+                    onChange={(e) => setLandingPage(e.target.value)}
+                />
+                <button onClick={updateTrackingLinksForAllVideos} disabled={isUpdating}>
+                    {isUpdating ? 'Updating...' : 'Update Tracking Links'}
+                </button>
+            </div>
+
+            {/* New Section for Replacing Links in Video Descriptions */}
+            <div className="replace-link-in-videos">
+                <h3>Replace Links in Video Descriptions</h3>
+                <input
+                    type="text"
+                    placeholder="Enter old link"
+                    value={oldLink}
+                    onChange={(e) => setOldLink(e.target.value)}
+                />
+                <input
+                    type="text"
+                    placeholder="Enter new link"
+                    value={newLink}
+                    onChange={(e) => setNewLink(e.target.value)}
+                />
+                <button onClick={replaceLinksInVideos} disabled={isReplacing}>
+                    {isReplacing ? 'Replacing...' : 'Replace Links'}
+                </button>
+            </div>
+
+            <div className="clean-link-in-video">
+                <h3>Reset Link in Video Description</h3>
+                <p> This will remove any utm parameters from the link in the video description</p>
+
+                <input
+                    type="text"
+                    placeholder="Enter YouTube video link"
+                    value={videoLink}
+                    onChange={(e) => setVideoLink(e.target.value)}
+                />
+                <input
+                    type="text"
+                    placeholder="Enter target URL"
+                    value={targetUrl}
+                    onChange={(e) => setTargetUrl(e.target.value)}
+                />
+                <button onClick={cleanLinkInVideo}>
+                    Clean Link
+                </button>
+            </div>
+
+            {/* New Section for cleaning link in all video descriptions */}
+            <div className="clean-link-in-all-videos">
+                <h3>Reset Link in All Video Descriptions</h3>
+                <p> This will remove any utm parameters from the link in all video descriptions</p>
+                <input
+                    type="text"
+                    placeholder="Enter target URL"
+                    value={targetUrlForAll}
+                    onChange={(e) => setTargetUrlForAll(e.target.value)}
+                />
+                <button onClick={cleanLinkInAllVideos} disabled={isReplacing}>
+                    {isReplacing ? 'Cleaning...' : 'Clean Links'}
+                </button>
+            </div>
+        </div>
+    );
+};
+
+export default ActionsContainer;
