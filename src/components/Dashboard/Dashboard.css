@@ -97,9 +97,17 @@ h1 {
     color: var(--text-color);
 }
 
+.actions-container button {
+    margin: 20px 0;
+}
+
+.filter-button {
+    margin: 20px 0;
+}
+
 button {
     display: block;
-    margin: 20px 0;
+    /* margin: 20px 0; */
     padding: 10px 20px;
     font-size: 1rem;
     color: #fff;
@@ -112,7 +120,7 @@ button {
 }
 
 .toggle-button {
-    margin: 0 0 0 0;
+    margin: 20px 0;
 
 }
 
@@ -188,6 +196,7 @@ th:nth-child(5)  /* Conversions column */ {
 }
 
 .youtube-button {
+    margin: 20px 0;
     background-color: #FF0000; /* Bright red color */
     color: white;
     border: none;
@@ -204,6 +213,7 @@ th:nth-child(5)  /* Conversions column */ {
 }
 
 .refresh-button {
+    margin: 20px 0;
     background-color: #FF0000; /* Bright red color */
     color: white;
     border: none;
@@ -278,4 +288,27 @@ th:nth-child(5)  /* Conversions column */ {
     width: 2.5rem; /* Adjust the width */
     height: 2.5rem; /* Adjust the height */
     line-height: 2.5rem; /* Center the text vertically */
+}
+
+.expand-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8em; /* Smaller font size */
+    margin-right: 5px;
+    color: var(--secondary-color); /* Use accent color for visibility */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px; /* Set a smaller fixed width */
+    height: 16px; /* Set a smaller fixed height */
+    line-height: 16px; /* Align text vertically */
+    border-radius: 50%; /* Make it circular */
+    transition: background-color 0.3s ease;
+    vertical-align: middle; /* Align with text */
+}
+
+.expand-button:hover {
+    background-color: var(--hover-color); /* Change background on hover */
+    color: var(--text-color); /* Change text color on hover */
 }

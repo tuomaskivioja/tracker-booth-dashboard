@@ -22,8 +22,6 @@ const Dashboard = () => {
 
     const { username, salesData, offers, setSalesData } = useRevit();
 
-    
-
     const refreshYouTubeData = async () => {
         setIsRefreshing(true);
         try {
@@ -180,36 +178,30 @@ const Dashboard = () => {
                     </select>
                 </div>
 
-                {/* Date Filter Button */}
-            
-
-                {/* Date Range Picker */}
-     
-                    <div className="date-range-picker">
-                        <label htmlFor="start-date">Start Date:</label>
-                        <DatePicker
-                            selected={startDate}
-                            onChange={(date) => setStartDate(date)}
-                            selectsStart
-                            startDate={startDate}
-                            endDate={endDate}
-                            dateFormat="yyyy/MM/dd"
-                            placeholderText="Select start date"
-                        />
-                        <label htmlFor="end-date">End Date:</label>
-                        <DatePicker
-                            selected={endDate}
-                            onChange={(date) => setEndDate(date)}
-                            selectsEnd
-                            startDate={startDate}
-                            endDate={endDate}
-                            minDate={startDate}
-                            dateFormat="yyyy/MM/dd"
-                            placeholderText="Select end date"
-                        />
-                        <button onClick={handleDateFilterSubmit}>Apply filter</button>
-                    </div>
-           
+                <div className="date-range-picker">
+                    <label htmlFor="start-date">Start Date:</label>
+                    <DatePicker
+                        selected={startDate}
+                        onChange={(date) => setStartDate(date)}
+                        selectsStart
+                        startDate={startDate}
+                        endDate={endDate}
+                        dateFormat="yyyy/MM/dd"
+                        placeholderText="Select start date"
+                    />
+                    <label htmlFor="end-date">End Date:</label>
+                    <DatePicker
+                        selected={endDate}
+                        onChange={(date) => setEndDate(date)}
+                        selectsEnd
+                        startDate={startDate}
+                        endDate={endDate}
+                        minDate={startDate}
+                        dateFormat="yyyy/MM/dd"
+                        placeholderText="Select end date"
+                    />
+                    <button className="filter-button" onClick={handleDateFilterSubmit}>Apply filter</button>
+                </div>
 
                 {isDateFiltered && (
                     <div className="date-filter-info">
@@ -228,12 +220,6 @@ const Dashboard = () => {
                             <tr>
                                 <th>Category</th>
                                 <th>Source</th>
-                                {/* <th
-                                    className={`sortable ${sortConfig.key === 'views' ? 'sorted' : ''}`}
-                                    onClick={() => requestSort('views')}
-                                >
-                                    Views {sortConfig.key === 'views' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
-                                </th> */}
                                 <th
                                     className={`sortable ${sortConfig.key === 'totalClicks' ? 'sorted' : ''}`}
                                     onClick={() => requestSort('totalClicks')}
@@ -246,7 +232,6 @@ const Dashboard = () => {
                                 >
                                     Conversions {sortConfig.key === 'totalSales' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
                                 </th>
-                                {/* <th>Click %</th> */}
                                 <th>Conversions % from Clicks</th>
                             </tr>
                         </thead>
@@ -256,15 +241,46 @@ const Dashboard = () => {
                                 const salesPercentage = sale.totalClicks ? ((sale.totalSales / sale.totalClicks) * 100).toFixed(2) : 'N/A';
                                 const formattedViews = sale.views ? new Intl.NumberFormat().format(sale.views) : 'N/A';
                                 return (
-                                    <tr key={index}>
-                                        <td>{sale.category}</td>
-                                        <td>{sale.category === 'video' && sale.youtube_title ? sale.youtube_title : sale.name}</td>
-                                        {/* <td>{formattedViews}</td> */}
-                                        <td>{Number(sale.totalClicks)}</td>
-                                        <td>{Number(sale.totalSales)}</td>
-                                        {/* <td>{clickPercentage}%</td> */}
-                                        <td>{salesPercentage}%</td>
-                                    </tr>
+                                    <React.Fragment key={index}>
+                                        <tr onClick={() => toggleRow(index)} className="clickable-row">
+                                            <td style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                                                {selectedOffer === 'all' && (
+                                                    <button className="expand-button">
+                                                        {toggledRows[index] ? '-' : '+'}
+                                                    </button>
+                                                )}
+                                                <span>{sale.category}</span>
+                                            </td>
+                                            <td>{sale.category === 'video' && sale.youtube_title ? sale.youtube_title : sale.name}</td>
+                                            <td>{Number(sale.totalClicks)}</td>
+                                            <td>{Number(sale.totalSales)}</td>
+                                            <td>{salesPercentage}%</td>
+                                        </tr>
+                                        {toggledRows[index] && selectedOffer === 'all' && (
+                                            <tr>
+                                                <td colSpan="5">
+                                                    <table className="nested-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Offer Name</th>
+                                                                <th>Clicks</th>
+                                                                <th>Conversions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {sale.offers.map((offer, offerIndex) => (
+                                                                <tr key={offerIndex}>
+                                                                    <td>{offer.offer_name}</td>
+                                                                    <td>{offer.click_count}</td>
+                                                                    <td>{offer.sale_count}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </React.Fragment>
                                 );
                             })}
                         </tbody>
