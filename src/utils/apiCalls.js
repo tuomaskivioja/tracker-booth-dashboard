@@ -27,7 +27,8 @@ export const fetchSalesData = async (username) => {
             offers: resource.offers.map(offer => ({
                 ...offer,
                 click_count: Number(offer.click_count),
-                sale_count: Number(offer.sale_count)
+                sale_count: Number(offer.sale_count),
+                call_booking_count: Number(offer.call_booking_count)
             }))
         }));
 

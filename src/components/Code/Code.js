@@ -12,6 +12,7 @@ const Code = () => {
     const [offerName, setOfferName] = useState('');
     const [generated, setGenerated] = useState(false);
     const [offers, setOffers] = useState([]);
+    const [requireCallBooking, setRequireCallBooking] = useState(false);
 
     useEffect(() => {
         const loadOffers = async () => {
@@ -39,6 +40,11 @@ const Code = () => {
     <script src="https://d15dfsr886zcp9.cloudfront.net/thankYou_script.js" defer></script>
 `;
 
+    const callBookingScript = (offer) => `
+    <meta name="offer" content="${offer}">
+    <script src="https://d15dfsr886zcp9.cloudfront.net/callBookingThankYouScript.js" defer></script>
+`;
+
     const copyToClipboard = (code, label) => {
         navigator.clipboard.writeText(code);
         setCopied(label);
@@ -49,10 +55,11 @@ const Code = () => {
         try {
             const response = await axios.post(`https://${SERVER_URL}/api/add-offer`, {
                 username: user.id,
-                offerName: offerName
+                offerName: offerName,
+                callBookingRequired: requireCallBooking
             });
             if (response.data.offerId) {
-                setOffers([...offers, { id: response.data.offerId, name: offerName }]);
+                setOffers([...offers, { id: response.data.offerId, name: offerName, call_booking_required: requireCallBooking }]);
                 setGenerated(true);
             } else {
                 alert('Offer already exists for this user');
@@ -90,6 +97,19 @@ const Code = () => {
                         <button onClick={handleGenerate}>Generate</button>
                     </div>
 
+                    <div className="call-booking-switch">
+                        <label htmlFor="call-booking">Do your customers have to book a call before buying?</label>
+                        <label className="switch">
+                            <input
+                                type="checkbox"
+                                id="call-booking"
+                                checked={requireCallBooking}
+                                onChange={(e) => setRequireCallBooking(e.target.checked)}
+                            />
+                            <span className="slider round"></span>
+                        </label>
+                    </div>
+
                     {generated && (
                         <>
                             <div className="code-block">
@@ -102,8 +122,20 @@ const Code = () => {
                                 </button>
                             </div>
 
+                            {requireCallBooking && (
+                                <div className="code-block">
+                                    <h2>2. Call Booking Thank You Script - copy & paste to your call booking thank you page</h2>
+                                    <p>Copy & paste the snippet below to your <b>Call Booking thank you page.</b> This is the page where your customers land right after booking a call.</p>
+
+                                    <pre>{callBookingScript(offerName)}</pre>
+                                    <button onClick={() => copyToClipboard(callBookingScript(offerName), 'callBookingScript')}>
+                                        {copied === 'callBookingScript' ? 'Copied!' : 'Copy'}
+                                    </button>
+                                </div>
+                            )}
+
                             <div className="code-block">
-                                <h2>2. Thank You Script - copy & paste to your thank you page(s)</h2>
+                                <h2>{requireCallBooking ? '3. Thank You Script - copy & paste to your thank you page' : '2. Thank You Script - copy & paste to your thank you page'}</h2>
                                 <p>Copy & paste the snippet below to your <b>Thank You page.</b> This is the page that your customer enters after they make a purchase. It sends information about user purchases after they have completed a transaction.</p>
 
                                 <pre>{thankYouScript(offerName)}</pre>
@@ -126,6 +158,11 @@ const Code = () => {
                         <button onClick={() => copyToClipboard(thankYouScript(offer.name), `thankYouScript-${index}`)}>
                             {copied === `thankYouScript-${index}` ? 'Copied!' : 'Copy Thank You Script'}
                         </button>
+                        {offer.call_booking_required && (
+                            <button onClick={() => copyToClipboard(callBookingScript(offer.name), `callBookingScript-${index}`)}>
+                                {copied === `callBookingScript-${index}` ? 'Copied!' : 'Copy Call Booking Script'}
+                            </button>
+                        )}
                     </div>
                 ))}
             </div>

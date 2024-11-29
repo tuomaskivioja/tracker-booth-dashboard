@@ -52,11 +52,13 @@ const Dashboard = () => {
     const filteredSales = salesData.map((resource) => {
         let totalClicks = 0;
         let totalSales = 0;
+        let totalCallBookings = 0;
 
         resource.offers.forEach((offer) => {
             if (selectedOffer === 'all' || offer.offer_name === selectedOffer) {
                 totalClicks += offer.click_count;
                 totalSales += offer.sale_count;
+                totalCallBookings += offer.call_booking_count;
             }
         });
 
@@ -64,11 +66,14 @@ const Dashboard = () => {
             ...resource,
             totalClicks,
             totalSales,
+            totalCallBookings
         };
     }).filter((resource) => {
         return (resource.totalClicks > 0 || resource.totalSales > 0) &&
                (filterType === 'all' || resource.category === filterType);
     });
+
+    const hasCallBookings = filteredSales.some(resource => resource.totalCallBookings > 0);
 
     const sortedSales = React.useMemo(() => {
         let sortableSales = [...filteredSales];
@@ -226,6 +231,7 @@ const Dashboard = () => {
                                 >
                                     Clicks {sortConfig.key === 'totalClicks' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
                                 </th>
+                                {hasCallBookings && <th>Call Bookings</th>}
                                 <th
                                     className={`sortable ${sortConfig.key === 'totalSales' ? 'sorted' : ''}`}
                                     onClick={() => requestSort('totalSales')}
@@ -253,17 +259,19 @@ const Dashboard = () => {
                                             </td>
                                             <td>{sale.category === 'video' && sale.youtube_title ? sale.youtube_title : sale.name}</td>
                                             <td>{Number(sale.totalClicks)}</td>
+                                            {hasCallBookings && <td>{Number(sale.totalCallBookings)}</td>}
                                             <td>{Number(sale.totalSales)}</td>
                                             <td>{salesPercentage}%</td>
                                         </tr>
                                         {toggledRows[index] && selectedOffer === 'all' && (
                                             <tr>
-                                                <td colSpan="5">
+                                                <td colSpan={hasCallBookings ? "6" : "5"}>
                                                     <table className="nested-table">
                                                         <thead>
                                                             <tr>
                                                                 <th>Offer Name</th>
                                                                 <th>Clicks</th>
+                                                                {hasCallBookings && <th>Call Bookings</th>}
                                                                 <th>Conversions</th>
                                                             </tr>
                                                         </thead>
@@ -272,6 +280,7 @@ const Dashboard = () => {
                                                                 <tr key={offerIndex}>
                                                                     <td>{offer.offer_name}</td>
                                                                     <td>{offer.click_count}</td>
+                                                                    {hasCallBookings && <td>{offer.call_booking_count}</td>}
                                                                     <td>{offer.sale_count}</td>
                                                                 </tr>
                                                             ))}
