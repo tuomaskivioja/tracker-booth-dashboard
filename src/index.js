@@ -5,6 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ClerkProvider } from '@clerk/clerk-react'
 import { RevitProvider } from './contexts/RevitContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Import your publishable key
 // const PUBLISHABLE_KEY = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
@@ -14,14 +15,18 @@ if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key")
 }
 
+const queryClient = new QueryClient();
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-      <RevitProvider>
-        <App />
-      </RevitProvider>
+    <QueryClientProvider client={queryClient}>
+        <RevitProvider>
+          <App />
+        </RevitProvider>
+      </QueryClientProvider>
     </ClerkProvider>
   </React.StrictMode>
 );
