@@ -26,18 +26,6 @@ export const RevitProvider = ({ children }) => {
         }
     }, [isLoaded, isSignedIn, user]);
 
-    // useEffect to fetch sales data and offers once the username is set/changed
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         if (username) {
-    //             const data = await fetchSalesData(username);
-    //             setSalesData(data);
-    //         }
-    //     };
-
-    //     fetchData();
-    // }, [username]);
-
     // Function to load offers with caching
     useEffect(() => {
         const loadOffers = async () => {

@@ -131,7 +131,7 @@ const ActionsContainer = ({ youtubeName, setSalesData }) => {
                     type="text"
                     placeholder="Enter landing page URL (without any utm parameters)"
                     value={landingPage}
-                    onChange={(e) => setLandingPage(e.target.value)}
+                    onChange={(e) => setLandingPage(e.target.value.trim())}
                 />
                 <button onClick={handleLinkAction} disabled={isUpdating}>
                     {isUpdating ? 'Processing...' : 'Update Link'}
