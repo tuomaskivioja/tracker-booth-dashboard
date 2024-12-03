@@ -33,7 +33,7 @@ const ActionsContainer = ({ youtubeName, setSalesData }) => {
         try {
             const response = await axios.put(`https://${SERVER_URL}/api/update-video-description/${videoId}`, {
                 userId: username,
-                url: landingPage
+                url: landingPage.trim()
             });
             alert(response.data.message);
         } catch (error) {
