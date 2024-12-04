@@ -380,3 +380,18 @@ th:nth-child(5)  /* Conversions column */ {
     background-color: var(--secondary-color);
     cursor: pointer;
 }
+
+.nested-table th,
+.nested-table td {
+    padding: 8px;
+    text-align: left;
+}
+
+.nested-table th:nth-child(2),
+.nested-table td:nth-child(2) {
+    width: 80px; /* Adjust the width as needed */
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

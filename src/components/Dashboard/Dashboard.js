@@ -273,17 +273,22 @@ const Dashboard = () => {
                                                                 <th>Clicks</th>
                                                                 {hasCallBookings && <th>Call Bookings</th>}
                                                                 <th>Conversions</th>
+                                                                <th>Conversions % from Clicks</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {sale.offers.map((offer, offerIndex) => (
-                                                                <tr key={offerIndex}>
-                                                                    <td>{offer.offer_name}</td>
-                                                                    <td>{offer.click_count}</td>
-                                                                    {hasCallBookings && <td>{offer.call_booking_count}</td>}
-                                                                    <td>{offer.sale_count}</td>
-                                                                </tr>
-                                                            ))}
+                                                            {sale.offers.map((offer, offerIndex) => {
+                                                                const offerSalesPercentage = offer.click_count ? ((offer.sale_count / offer.click_count) * 100).toFixed(2) : 'N/A';
+                                                                return (
+                                                                    <tr key={offerIndex}>
+                                                                        <td>{offer.offer_name}</td>
+                                                                        <td>{offer.click_count}</td>
+                                                                        {hasCallBookings && <td>{offer.call_booking_count}</td>}
+                                                                        <td>{offer.sale_count}</td>
+                                                                        <td>{offerSalesPercentage}%</td>
+                                                                    </tr>
+                                                                );
+                                                            })}
                                                         </tbody>
                                                     </table>
                                                 </td>
