@@ -4,13 +4,16 @@ import { useRevit } from '../../contexts/RevitContext';
 
 const ActionsContainer = ({ youtubeName, setSalesData }) => {
     const [videoLink, setVideoLink] = useState('');
-    const [landingPage, setLandingPage] = useState('');
+    const [specificVideoLandingPage, setSpecificVideoLandingPage] = useState('');
+    const [allVideosLandingPage, setAllVideosLandingPage] = useState('');
     const [isUpdating, setIsUpdating] = useState(false);
     const [oldLink, setOldLink] = useState('');
     const [newLink, setNewLink] = useState('');
     const [isReplacing, setIsReplacing] = useState(false);
     const [targetUrl, setTargetUrl] = useState('');
     const [targetUrlForAll, setTargetUrlForAll] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const [isConfirmed, setIsConfirmed] = useState(false);
 
     const { username } = useRevit();
 
@@ -33,7 +36,7 @@ const ActionsContainer = ({ youtubeName, setSalesData }) => {
         try {
             const response = await axios.put(`https://${SERVER_URL}/api/update-video-description/${videoId}`, {
                 userId: username,
-                url: landingPage.trim()
+                url: specificVideoLandingPage.trim()
             });
             alert(response.data.message);
         } catch (error) {
@@ -49,7 +52,7 @@ const ActionsContainer = ({ youtubeName, setSalesData }) => {
         try {
             const response = await axios.put(`https://${SERVER_URL}/api/add-tracking-to-videos`, {
                 userId: username,
-                url: landingPage
+                url: allVideosLandingPage
             });
             alert(response.data.message);
         } catch (error) {
@@ -114,13 +117,26 @@ const ActionsContainer = ({ youtubeName, setSalesData }) => {
         }
     };
 
+    const handleUpdateClick = () => {
+        setShowModal(true);
+    };
+
+    const handleConfirmChange = (e) => {
+        setIsConfirmed(e.target.checked);
+    };
+
+    const handleProceedClick = () => {
+        setShowModal(false);
+        setIsUpdating(true);
+        updateTrackingLinksForAllVideos();
+    };
+
     return (
         <div className="actions-container">
             {/* Section for adding or updating tracking link to a specific video */}
             <div className="add-update-link">
                 <h3>Update Tracking Link for a Specific Video</h3>
                 <p> This will add the Revit tracking parameter to the link in the video description</p>
-                <p> NOTE: Make sure there is a space immediately after the link in your description.</p>
                 <input
                     type="text"
                     placeholder="Enter YouTube video link"
@@ -130,8 +146,8 @@ const ActionsContainer = ({ youtubeName, setSalesData }) => {
                 <input
                     type="text"
                     placeholder="Enter landing page URL (without any utm parameters)"
-                    value={landingPage}
-                    onChange={(e) => setLandingPage(e.target.value.trim())}
+                    value={specificVideoLandingPage}
+                    onChange={(e) => setSpecificVideoLandingPage(e.target.value.trim())}
                 />
                 <button onClick={handleLinkAction} disabled={isUpdating}>
                     {isUpdating ? 'Processing...' : 'Update Link'}
@@ -141,16 +157,42 @@ const ActionsContainer = ({ youtubeName, setSalesData }) => {
             <div className="update-tracking-links">
                 <h3>Update Tracking Links for All Videos</h3>
                 <p> Warning: Only use this after you have tested the link in a specific video using the form above</p>
-                <p> NOTE: Make sure there is a space immediately after the link in your descriptions.</p>
                 <input
                     type="text"
                     placeholder="Enter landing page URL"
-                    value={landingPage}
-                    onChange={(e) => setLandingPage(e.target.value)}
+                    value={allVideosLandingPage}
+                    onChange={(e) => setAllVideosLandingPage(e.target.value.trim())}
                 />
-                <button onClick={updateTrackingLinksForAllVideos} disabled={isUpdating}>
+                <button onClick={handleUpdateClick} disabled={isUpdating}>
                     {isUpdating ? 'Updating...' : 'Update Tracking Links'}
                 </button>
+
+                {showModal && (
+                    <div className="modal">
+                        <div className="modal-content">
+                            <h4>Warning: </h4>
+                            <p>This operation will update your links for <b>all videos.</b></p>
+                            <p>Before proceeding, please confirm that you have tested updating one video and it worked correctly.</p>
+                            <p>If it did not, please reach out to us for support.</p>
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={isConfirmed}
+                                    onChange={handleConfirmChange}
+                                />
+                                I have tested updating one video using the form above and it worked correctly.
+                            </label>
+                            <button
+                                onClick={handleProceedClick}
+                                disabled={!isConfirmed}
+                                className={isConfirmed ? 'active' : 'disabled'}
+                            >
+                                Proceed with Update
+                            </button>
+                            <button onClick={() => setShowModal(false)}>Cancel</button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* New Section for Replacing Links in Video Descriptions */}
