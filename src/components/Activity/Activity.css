@@ -29,3 +29,19 @@
     color: red;
     font-weight: bold;
 }
+
+.stats-summary {
+    display: flex;
+    flex-direction: row;
+    justify-content: left; /* Adjusts spacing between items */
+    align-items: center; /* Aligns items vertically */
+    margin-bottom: 20px; /* Adds some space below the summary */
+}
+
+.stats-summary > div {
+
+    padding: 10px; /* Adds some padding around each section */
+    text-align: center; /* Centers the text within each section */
+    border-radius: 5px; /* Optional: Rounds the corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Adds a subtle shadow */
+}
