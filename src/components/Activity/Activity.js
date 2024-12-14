@@ -41,14 +41,33 @@ const Activity = () => {
     const last7Days = new Date(now);
     last7Days.setDate(now.getDate() - 7);
 
-    const calculateCounts = (timestamps) => {
-        const last30DaysCount = timestamps.filter(timestamp => new Date(timestamp) >= last30Days).length;
-        const last7DaysCount = timestamps.filter(timestamp => new Date(timestamp) >= last7Days).length;
-        return { last30DaysCount, last7DaysCount };
+    const previous30Days = new Date(last30Days);
+    previous30Days.setDate(previous30Days.getDate() - 30);
+    const previous7Days = new Date(last7Days);
+    previous7Days.setDate(previous7Days.getDate() - 7);
+
+    const calculateCounts = (timestamps, startDate, endDate) => {
+        return timestamps.filter(timestamp => new Date(timestamp) >= startDate && new Date(timestamp) < endDate).length;
     };
 
-    const clicksCounts = calculateCounts(stats.clicks);
-    const salesCounts = calculateCounts(stats.sales);
+    const clicksCounts = {
+        last30DaysCount: calculateCounts(stats.clicks, last30Days, now),
+        last7DaysCount: calculateCounts(stats.clicks, last7Days, now),
+        previous30DaysCount: calculateCounts(stats.clicks, previous30Days, last30Days),
+        previous7DaysCount: calculateCounts(stats.clicks, previous7Days, last7Days),
+    };
+
+    const salesCounts = {
+        last30DaysCount: calculateCounts(stats.sales, last30Days, now),
+        last7DaysCount: calculateCounts(stats.sales, last7Days, now),
+        previous30DaysCount: calculateCounts(stats.sales, previous30Days, last30Days),
+        previous7DaysCount: calculateCounts(stats.sales, previous7Days, last7Days),
+    };
+
+    const calculatePercentageChange = (current, previous) => {
+        if (previous === 0) return current > 0 ? '+∞%' : '0%';
+        return `${(((current - previous) / previous) * 100).toFixed(2)}%`;
+    };
 
     return (
         <div className="activity-container">
@@ -57,12 +76,32 @@ const Activity = () => {
                 <div>
                     <h3>Clicks</h3>
                     <p>Last 30 Days: {clicksCounts.last30DaysCount}</p>
+                    <p>
+                        <span className="change-text">
+                            {calculatePercentageChange(clicksCounts.last30DaysCount, clicksCounts.previous30DaysCount)} vs previous 30 days
+                        </span>
+                    </p>
                     <p>Last 7 Days: {clicksCounts.last7DaysCount}</p>
+                    <p>
+                        <span className="change-text">
+                            {calculatePercentageChange(clicksCounts.last7DaysCount, clicksCounts.previous7DaysCount)} vs previous 7 days
+                        </span>
+                    </p>
                 </div>
                 <div>
                     <h3>Sales</h3>
                     <p>Last 30 Days: {salesCounts.last30DaysCount}</p>
+                    <p>
+                        <span className="change-text">
+                            {calculatePercentageChange(salesCounts.last30DaysCount, salesCounts.previous30DaysCount)} vs previous 30 days
+                        </span>
+                    </p>
                     <p>Last 7 Days: {salesCounts.last7DaysCount}</p>
+                    <p>
+                        <span className="change-text">
+                            {calculatePercentageChange(salesCounts.last7DaysCount, salesCounts.previous7DaysCount)} vs previous 7 days
+                        </span>
+                    </p>
                 </div>
             </div>
 

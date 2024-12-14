@@ -45,3 +45,9 @@
     border-radius: 5px; /* Optional: Rounds the corners */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Adds a subtle shadow */
 }
+
+.change-text {
+    font-size: 0.9em; /* Slightly smaller font size */
+    color: #666; /* Optional: lighter color for less emphasis */
+    font-weight: normal; /* Ensure consistent weight */
+}
