@@ -56,9 +56,9 @@ const Dashboard = () => {
 
         resource.offers.forEach((offer) => {
             if (selectedOffer === 'all' || offer.offer_name === selectedOffer) {
-                totalClicks += offer.click_count;
-                totalSales += offer.sale_count;
-                totalCallBookings += offer.call_booking_count;
+                totalClicks += Number(offer.click_count) || 0;
+                totalSales += Number(offer.sale_count) || 0;
+                totalCallBookings += Number(offer.call_booking_count) || 0;
             }
         });
 
