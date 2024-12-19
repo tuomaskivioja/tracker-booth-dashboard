@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import './Activity.css';
 import { useRevit } from '../../contexts/RevitContext';
@@ -8,6 +8,7 @@ const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
 const Activity = () => {
     const { username } = useRevit();
+    const [selectedOffer, setSelectedOffer] = useState('all');
 
     // Fetch latest conversions
     const { data: conversions, error: conversionsError, isLoading: isLoadingConversions } = useQuery({
@@ -69,6 +70,14 @@ const Activity = () => {
         return `${(((current - previous) / previous) * 100).toFixed(2)}%`;
     };
 
+    // Filter conversions by selected offer
+    const filteredConversions = conversions
+        .filter(conversion => selectedOffer === 'all' || conversion.offer_name === selectedOffer)
+        .slice(0, 20); // Limit to 20 conversions
+
+    // Get unique offer names for the dropdown
+    const offerNames = [...new Set(conversions.map(conversion => conversion.offer_name))];
+
     return (
         <div className="activity-container">
             <h2>Activity Overview</h2>
@@ -106,8 +115,23 @@ const Activity = () => {
             </div>
 
             <h2>Latest Conversions</h2>
+            <div className="filter-container">
+                <label htmlFor="offer-filter">Filter by Offer:</label>
+                <select
+                    id="offer-filter"
+                    value={selectedOffer}
+                    onChange={(e) => setSelectedOffer(e.target.value)}
+                >
+                    <option value="all">All Offers</option>
+                    {offerNames.map((offerName, index) => (
+                        <option key={index} value={offerName}>
+                            {offerName}
+                        </option>
+                    ))}
+                </select>
+            </div>
             <ul>
-                {conversions.map((conversion, index) => (
+                {filteredConversions.map((conversion, index) => (
                     <li key={index}>
                         <strong>{conversion.offer_name}</strong> conversion from {conversion.resource_type} <strong>{conversion.youtube_title ? conversion.youtube_title : conversion.resource_name}</strong> on {new Date(conversion.timestamp).toLocaleString()}
                     </li>
