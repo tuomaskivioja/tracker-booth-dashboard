@@ -63,12 +63,28 @@
 }
 
 .sidebar button {
-    background-color: #3b82f6;
-    color: #e5e7eb;
+    background-color: transparent; /* Match NavLink background */
+    color: #e5e7eb; /* Match NavLink text color */
     border: none;
-    padding: 10px 20px;
-    border-radius: 5px; /* Rounded corners */
+    padding: 10px 15px; /* Match NavLink padding */
+    border-radius: 4px; /* Match NavLink border radius */
     cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: 16px;
+    transition: background-color 0.3s ease;
+    font-size: 18px; /* Match NavLink font size */
+    display: block; /* Match NavLink display */
+    text-align: left; /* Align text to the left */
+    width: 100%; /* Full width like NavLink */
+}
+
+.sidebar button:hover {
+    background-color: #374151; /* Match NavLink hover color */
+}
+
+.sidebar button:focus {
+    outline: none; /* Remove default focus outline */
+}
+
+.sidebar button:active {
+    background-color: #2563eb; /* Darker accent on active */
+    font-weight: bold; /* Match active NavLink font weight */
 }
