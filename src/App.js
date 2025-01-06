@@ -17,6 +17,7 @@ function App() {
             <Routes>
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/" element={<SignInPage />} />
+                <Route path="/dashboard" element={<Navigate to="/" />} />
             </Routes>
           </SignedOut>
           <SignedIn>
