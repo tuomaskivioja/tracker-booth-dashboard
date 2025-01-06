@@ -9,7 +9,7 @@ import { useRevit } from '../../contexts/RevitContext';
 const Sidebar = () => {
     const { username } = useRevit();
     const SERVER_URL = process.env.REACT_APP_SERVER_URL;
-    
+
     const openBillingPortal = async () => {
         try {
             const response = await fetch(`https://${SERVER_URL}/api/create-billing-portal-session`, {
@@ -50,11 +50,11 @@ const Sidebar = () => {
                         Conversion activity
                     </NavLink>
                 </li>
-                <li>
+                {/* <li>
                     <button onClick={openBillingPortal} className="billing-portal-button">
                         Manage subscription
                     </button>
-                </li>
+                </li> */}
             </ul>
             <SignOutButton displayName="Sign out from Revit" style={{ backgroundColor: '#e74c3c' }} />
             <div className="footer">
