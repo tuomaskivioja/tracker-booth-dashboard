@@ -395,3 +395,10 @@ th:nth-child(5)  /* Conversions column */ {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+/* Add styles for percentage columns */
+.table-container th.percentage-column,
+.table-container td.percentage-column {
+    width: 100px; /* Adjust the width as needed */
+    text-align: center; /* Center align the text */
+}

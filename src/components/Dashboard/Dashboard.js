@@ -84,6 +84,9 @@ const Dashboard = () => {
                 if (sortConfig.key === 'salesPercentage') {
                     aValue = a.totalClicks ? (a.totalSales / a.totalClicks) * 100 : 0;
                     bValue = b.totalClicks ? (b.totalSales / b.totalClicks) * 100 : 0;
+                } else if (sortConfig.key === 'clickPercentage') {
+                    aValue = a.views ? (a.totalClicks / a.views) * 100 : 0;
+                    bValue = b.views ? (b.totalClicks / b.views) * 100 : 0;
                 } else {
                     aValue = Number(a[sortConfig.key]) || 0;
                     bValue = Number(b[sortConfig.key]) || 0;
@@ -233,6 +236,12 @@ const Dashboard = () => {
                                 <th>Category</th>
                                 <th>Source</th>
                                 <th
+                                    className={`sortable ${sortConfig.key === 'views' ? 'sorted' : ''}`}
+                                    onClick={() => requestSort('views')}
+                                >
+                                    Views {sortConfig.key === 'views' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                                </th>
+                                <th
                                     className={`sortable ${sortConfig.key === 'totalClicks' ? 'sorted' : ''}`}
                                     onClick={() => requestSort('totalClicks')}
                                 >
@@ -253,7 +262,13 @@ const Dashboard = () => {
                                     Conversions {sortConfig.key === 'totalSales' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
                                 </th>
                                 <th
-                                    className={`sortable ${sortConfig.key === 'salesPercentage' ? 'sorted' : ''}`}
+                                    className={`sortable percentage-column ${sortConfig.key === 'clickPercentage' ? 'sorted' : ''}`}
+                                    onClick={() => requestSort('clickPercentage')}
+                                >
+                                    Clicks % from Views {sortConfig.key === 'clickPercentage' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                                </th>
+                                <th
+                                    className={`sortable percentage-column ${sortConfig.key === 'salesPercentage' ? 'sorted' : ''}`}
                                     onClick={() => requestSort('salesPercentage')}
                                 >
                                     Conversions % from Clicks {sortConfig.key === 'salesPercentage' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
@@ -277,10 +292,12 @@ const Dashboard = () => {
                                                 <span>{sale.category}</span>
                                             </td>
                                             <td>{sale.category === 'video' && sale.youtube_title ? sale.youtube_title : sale.name}</td>
+                                            <td>{formattedViews}</td>
                                             <td>{Number(sale.totalClicks)}</td>
                                             {hasCallBookings && <td>{Number(sale.totalCallBookings)}</td>}
                                             <td>{Number(sale.totalSales)}</td>
-                                            <td>{salesPercentage}%</td>
+                                            <td className="percentage-column">{clickPercentage}%</td>
+                                            <td className="percentage-column">{salesPercentage}%</td>
                                         </tr>
                                         {toggledRows[index] && selectedOffer === 'all' && (
                                             <tr>
