@@ -79,8 +79,15 @@ const Dashboard = () => {
         let sortableSales = [...filteredSales];
         if (sortConfig.key !== null) {
             sortableSales.sort((a, b) => {
-                const aValue = Number(a[sortConfig.key]) || 0;
-                const bValue = Number(b[sortConfig.key]) || 0;
+                let aValue, bValue;
+
+                if (sortConfig.key === 'salesPercentage') {
+                    aValue = a.totalClicks ? (a.totalSales / a.totalClicks) * 100 : 0;
+                    bValue = b.totalClicks ? (b.totalSales / b.totalClicks) * 100 : 0;
+                } else {
+                    aValue = Number(a[sortConfig.key]) || 0;
+                    bValue = Number(b[sortConfig.key]) || 0;
+                }
 
                 if (aValue < bValue) {
                     return sortConfig.direction === 'ascending' ? -1 : 1;
@@ -231,14 +238,26 @@ const Dashboard = () => {
                                 >
                                     Clicks {sortConfig.key === 'totalClicks' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
                                 </th>
-                                {hasCallBookings && <th>Call Bookings</th>}
+                                {hasCallBookings && (
+                                    <th
+                                        className={`sortable ${sortConfig.key === 'totalCallBookings' ? 'sorted' : ''}`}
+                                        onClick={() => requestSort('totalCallBookings')}
+                                    >
+                                        Call Bookings {sortConfig.key === 'totalCallBookings' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                                    </th>
+                                )}
                                 <th
                                     className={`sortable ${sortConfig.key === 'totalSales' ? 'sorted' : ''}`}
                                     onClick={() => requestSort('totalSales')}
                                 >
                                     Conversions {sortConfig.key === 'totalSales' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
                                 </th>
-                                <th>Conversions % from Clicks</th>
+                                <th
+                                    className={`sortable ${sortConfig.key === 'salesPercentage' ? 'sorted' : ''}`}
+                                    onClick={() => requestSort('salesPercentage')}
+                                >
+                                    Conversions % from Clicks {sortConfig.key === 'salesPercentage' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
