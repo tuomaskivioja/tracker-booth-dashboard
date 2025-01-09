@@ -155,7 +155,7 @@ const Dashboard = () => {
                 )}
 
                 <button className="refresh-button" onClick={refreshYouTubeData} disabled={isRefreshing}>
-                    {isRefreshing ? 'Refreshing...' : 'Refresh YouTube Data'}
+                    {isRefreshing ? 'Refreshing...' : 'Refresh YouTube Views'}
                 </button>
 
                 <h2>Sales and Clicks Dashboard</h2>
