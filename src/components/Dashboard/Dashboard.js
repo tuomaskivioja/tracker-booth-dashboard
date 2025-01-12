@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import './Dashboard.css';
 import axios from 'axios';
 import { fetchSalesData, handleLoginWithYouTube, fetchDataByDateRange, handleLogout, checkYouTubeLogin } from '../../utils/apiCalls';
@@ -19,6 +19,7 @@ const Dashboard = () => {
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [isDateFiltered, setIsDateFiltered] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const { username, salesData, offers, setSalesData } = useRevit();
 
@@ -135,6 +136,25 @@ const Dashboard = () => {
         setSalesData(data);
     };
 
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const filteredAndSortedSales = useMemo(() => {
+        const lowercasedSearchTerm = searchTerm.toLowerCase();
+        console.log('Search Term:', lowercasedSearchTerm);
+
+        const filteredSales = sortedSales.filter(sale => {
+            const saleName = sale.name.toLowerCase();
+            const youtubeTitle = sale.youtube_title ? sale.youtube_title.toLowerCase() : '';
+            console.log('Checking:', saleName, youtubeTitle);
+            return saleName.includes(lowercasedSearchTerm) || youtubeTitle.includes(lowercasedSearchTerm);
+        });
+
+        console.log('Filtered Sales:', filteredSales);
+        return filteredSales;
+    }, [sortedSales, searchTerm]);
+
     return (
         <div className="dashboard-container">
             <div className="table-container">
@@ -227,6 +247,16 @@ const Dashboard = () => {
                     </div>
                 )}
 
+                <div className="search-container">
+                    <input
+                        type="text"
+                        placeholder="Search by name..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        className="search-input"
+                    />
+                </div>
+
                 {error ? (
                     <p className="error-message">{error}</p>
                 ) : (
@@ -276,7 +306,7 @@ const Dashboard = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {sortedSales.map((sale, index) => {
+                            {filteredAndSortedSales.map((sale, index) => {
                                 const clickPercentage = sale.views ? ((sale.totalClicks / sale.views) * 100).toFixed(2) : 'N/A';
                                 const salesPercentage = sale.totalClicks ? ((sale.totalSales / sale.totalClicks) * 100).toFixed(2) : 'N/A';
                                 const formattedViews = sale.views ? new Intl.NumberFormat().format(sale.views) : 'N/A';

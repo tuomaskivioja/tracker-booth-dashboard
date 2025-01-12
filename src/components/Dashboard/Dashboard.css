@@ -402,3 +402,29 @@ th:nth-child(5)  /* Conversions column */ {
     width: 100px; /* Adjust the width as needed */
     text-align: center; /* Center align the text */
 }
+
+/* Add styles for the search input */
+.search-container {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+
+.search-input {
+    width: 100%;
+    max-width: 300px; /* Limit the maximum width */
+    padding: 10px;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 5px var(--secondary-color);
+    outline: none;
+}
