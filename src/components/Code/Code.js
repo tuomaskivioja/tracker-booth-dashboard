@@ -137,7 +137,7 @@ const Code = () => {
                             <div className="code-block">
                                 <h2>{requireCallBooking ? '3. Thank You Script - copy & paste to your thank you page' : '2. Thank You Script - copy & paste to your thank you page'}</h2>
                                 <p>Copy & paste the snippet below to your <b>Thank You page.</b> This is the page that your customer enters after they make a purchase. It sends information about user purchases after they have completed a transaction.</p>
-
+                                <p>Note: make sure this page is under the same domain as your landing page above.</p>
                                 <pre>{thankYouScript(offerName)}</pre>
                                 <button onClick={() => copyToClipboard(thankYouScript(offerName), 'thankYouScript')}>
                                     {copied === 'thankYouScript' ? 'Copied!' : 'Copy'}
