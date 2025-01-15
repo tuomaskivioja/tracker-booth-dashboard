@@ -93,10 +93,85 @@ h1 {
 }
 
 .offer-item {
-    background-color: #1f2937;
+    position: relative;
+    margin-bottom: 20px;
     padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--card-bg-color);
+}
+
+.offer-item p {
+    margin: 5px 0;
+}
+
+.offer-item input[type="text"],
+.offer-item input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 2px solid var(--border-color);
     border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.offer-item input[type="text"]:focus,
+.offer-item input[type="number"]:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 5px var(--secondary-color);
+    outline: none;
+}
+
+.offer-item button {
+    margin-right: 10px;
+    padding: 8px 16px;
+    font-size: 1rem;
+    color: #fff;
+    background-color: var(--secondary-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.offer-item button:hover {
+    background-color: var(--hover-color);
+}
+
+.offer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.offer-name {
+    margin: 0;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.edit-icon {
+    cursor: pointer;
+    color: var(--secondary-color);
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+}
+
+.edit-icon:hover {
+    color: var(--hover-color);
+}
+
+.code-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #e5e7eb;
+    position: relative;
 }
 
 .code-block {

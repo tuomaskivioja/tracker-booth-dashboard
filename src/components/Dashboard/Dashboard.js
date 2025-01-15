@@ -54,12 +54,14 @@ const Dashboard = () => {
         let totalClicks = 0;
         let totalSales = 0;
         let totalCallBookings = 0;
+        let totalRevenue = 0;
 
         resource.offers.forEach((offer) => {
             if (selectedOffer === 'all' || offer.offer_name === selectedOffer) {
                 totalClicks += Number(offer.click_count) || 0;
                 totalSales += Number(offer.sale_count) || 0;
                 totalCallBookings += Number(offer.call_booking_count) || 0;
+                totalRevenue += Number(offer.conversion_value) * Number(offer.sale_count) || 0;
             }
         });
 
@@ -67,7 +69,8 @@ const Dashboard = () => {
             ...resource,
             totalClicks,
             totalSales,
-            totalCallBookings
+            totalCallBookings,
+            totalRevenue
         };
     }).filter((resource) => {
         return (resource.totalClicks > 0 || resource.totalSales > 0) &&
@@ -270,6 +273,9 @@ const Dashboard = () => {
                                     onClick={() => requestSort('views')}
                                 >
                                     Views {sortConfig.key === 'views' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                                    <span className="tooltip-icon">?
+                                        <div className="tooltip-text">To update views, click the "Refresh YouTube Views" button.</div>
+                                    </span>
                                 </th>
                                 <th
                                     className={`sortable ${sortConfig.key === 'totalClicks' ? 'sorted' : ''}`}
@@ -290,6 +296,15 @@ const Dashboard = () => {
                                     onClick={() => requestSort('totalSales')}
                                 >
                                     Conversions {sortConfig.key === 'totalSales' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                                </th>
+                                <th
+                                    className={`sortable revenue-column ${sortConfig.key === 'totalRevenue' ? 'sorted' : ''}`}
+                                    onClick={() => requestSort('totalRevenue')}
+                                >
+                                    Revenue {sortConfig.key === 'totalRevenue' ? (sortConfig.direction === 'ascending' ? '↑' : '↓') : ''}
+                                    <span className="tooltip-icon">?
+                                        <div className="tooltip-text">You can assign a conversion value to each offer in the "Code" section.</div>
+                                    </span>
                                 </th>
                                 <th
                                     className={`sortable percentage-column ${sortConfig.key === 'clickPercentage' ? 'sorted' : ''}`}
@@ -321,11 +336,12 @@ const Dashboard = () => {
                                                 )}
                                                 <span>{sale.category}</span>
                                             </td>
-                                            <td>{sale.category === 'video' && sale.youtube_title ? sale.youtube_title : sale.name}</td>
+                                            <td className="name-column">{sale.category === 'video' && sale.youtube_title ? sale.youtube_title : sale.name}</td>
                                             <td>{formattedViews}</td>
                                             <td>{Number(sale.totalClicks)}</td>
                                             {hasCallBookings && <td>{Number(sale.totalCallBookings)}</td>}
                                             <td>{Number(sale.totalSales)}</td>
+                                            <td className="revenue-column">${Number(sale.totalRevenue)}</td>
                                             <td className="percentage-column">{clickPercentage}%</td>
                                             <td className="percentage-column">{salesPercentage}%</td>
                                         </tr>

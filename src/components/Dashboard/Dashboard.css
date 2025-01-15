@@ -145,7 +145,7 @@ table {
 table th, table td {
     border: 1px solid var(--border-color);
     padding: 12px;
-    text-align: left;
+    text-align: center;
     font-size: 1rem;
     color: var(--text-color);
 }
@@ -427,4 +427,46 @@ th:nth-child(5)  /* Conversions column */ {
     border-color: var(--secondary-color);
     box-shadow: 0 0 5px var(--secondary-color);
     outline: none;
+}
+
+.name-column {
+    text-align: left;
+}
+
+.revenue-column {
+    position: relative;
+    width: 100px; /* Adjust the width as needed */
+    text-align: center; /* Optional: Align text to the right for better readability */
+}
+
+.tooltip-icon {
+    display: inline-block;
+    margin-left: 5px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--secondary-color);
+    position: relative;
+}
+
+.tooltip-text {
+    visibility: hidden;
+    width: 200px;
+    background-color: #f0f0f0; /* Light grey background */
+    color: #333; /* Dark text color for contrast */
+    text-align: center;
+    border-radius: 5px; /* Rounded corners */
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Position above the icon */
+    left: 50%;
+    margin-left: -100px; /* Center the tooltip */
+    opacity: 0;
+    transition: opacity 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional: Add a subtle shadow for depth */
+}
+
+.tooltip-icon:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
 }
